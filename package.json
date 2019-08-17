@@ -1,0 +1,23 @@
+{
+  "name": "react-blockstack-context",
+  "version": "0.1.0",
+  "description": "React context for the Blockstack SDK",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/njordhov/react-blockstack-context.git"
+  },
+  "keywords": [
+    "react",
+    "blockstack"
+  ],
+  "author": "Terje Norderhaug",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/njordhov/react-blockstack-context/issues"
+  },
+  "homepage": "https://github.com/njordhov/react-blockstack-context#readme"
+}
