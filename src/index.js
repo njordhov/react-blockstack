@@ -1,0 +1,150 @@
+import React, { Component, createContext, useState, useEffect, useContext } from 'react'
+import { UserSession, AppConfig, Person } from 'blockstack';
+import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
+import { isNil, isEqual, isFunction } from 'lodash'
+
+const contextAtom = Atom.of({})
+
+export function useBlockstackContext () {
+  return( useAtom(contextAtom) )
+}
+
+const merge = (obj1, obj2) => Object.assign ({}, obj1, obj2)
+
+export function setContext(update) {
+  // use sparingly as it triggers all using components to update
+  swap(contextAtom, state => merge(state, isFunction(update) ? update(state) : update))
+}
+
+function handleSignIn(e) {
+  const { userSession } = deref(contextAtom)
+  e.preventDefault();
+  userSession.redirectToSignIn();
+}
+
+function handleSignOut(e) {
+  const { userSession } = deref(contextAtom)
+  e.preventDefault();
+  userSession.signUserOut();
+  const update = { userData: null,
+                   handleSignIn: handleSignIn,
+                   handleSignOut: null}
+  setContext( update )
+  document.documentElement.classList.remove("user-signed-in")
+}
+
+export const BlockstackContext = createContext(null)
+
+function handleAuthenticated (userData) {
+  console.log("Signed In")
+  window.history.replaceState({}, document.title, "/")
+  const update = { userData: userData,
+                   person: new Person(userData.profile),
+                   handleSignIn: null,
+                   handleSignOut: handleSignOut}
+  setContext( update )
+}
+
+export function initBlockstackContext (options) {
+  // Idempotent - mention in documentation!
+  const { userSession } = deref(contextAtom)
+  if (!userSession) {
+    const userSession = new UserSession(options)
+    const update = {userSession: userSession,
+                    userData: null,
+                    handleSignIn: handleSignIn,
+                    handleSignOut: null}
+    setContext( update )
+    if (userSession.isSignInPending()) {
+      userSession.handlePendingSignIn().then( handleAuthenticated )
+    } else if (userSession.isUserSignedIn()) {
+      handleAuthenticated (userSession.loadUserData())
+    }
+  }
+}
+
+export function Blockstack(props) {
+   const context = useBlockstackContext()
+   return <BlockstackContext.Provider value={context}>
+            {props.children}
+          </BlockstackContext.Provider>
+}
+
+/* Persistent Context */
+
+function useStateWithLocalStorage (storageKey) {
+  const stored = localStorage.getItem(storageKey)
+  const content = (typeof stored != 'undefined') ? JSON.parse(stored) : null
+  console.log("Stored:", stored, typeof stored)
+  const [value, setValue] = useState(content)
+  React.useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(value || null));
+  }, [value])
+  return [value, setValue];
+}
+
+function useStateWithGaiaStorage (userSession, path) {
+  const [value, setValue] = useState(null)
+  console.log("Persistent = ", value)
+  // React roadmap is to support data loading with Suspense hook
+  if ( isNil(value) ) {
+    userSession.getFile(path)
+      .then(stored => {
+           console.log("PERSISTENT get:", path, value, stored)
+           const content = !isNil(stored) ? JSON.parse(stored) : {}
+           setValue(content)
+          })
+        }
+  // ##FIX: Saves initially loaded value (use updated React.Suspense hook when available)
+  useEffect(() => {
+    if ( !isNil(value) ) {
+         console.log("PERSISTENT Put:", path, JSON.stringify(value))
+         userSession.putFile(path, JSON.stringify(value))
+    }})
+  return [value, setValue]
+}
+
+export function Persistent (props) {
+  // perhaps should only bind value to context for its children?
+  // ##FIX: validate input properties, particularly props.property
+  const version = props.version || 0
+  const property = props.property
+  const path = props.path || property
+  const context = useContext(BlockstackContext)
+  const { userSession, userData } = context
+  const [stored, setStored] = props.local
+                            ? useStateWithLocalStorage(props.path)
+                            : useStateWithGaiaStorage(userSession, props.path)
+  const content = property ? context[property] : null
+  useEffect(() => {
+    if (stored && !isEqual (content, stored)) {
+        console.log("PERSISTENT Set:", content, stored)
+        if (version != stored.version) {
+          // ## Fix: better handling of version including migration
+          console.log("Mismatching version in file", path, " - expected", version, "got", stored.version)
+        }
+        const entry = {}
+        entry[property] = stored.content
+        setContext(entry)
+  }}, [stored])
+
+  useEffect(() => {
+        if (!isEqual (content, stored)) {
+          console.log("PERSISTENT save:", content, stored)
+          setStored({version: version, property: property, content: content})
+        } else {
+          console.log("PERSISTENT noop:", content, stored)
+        }
+      }, [content])
+
+  return (
+    props.debug ?
+    <div>
+      <h1>Persistent Context: {property}</h1>
+      <p>Stored: { JSON.stringify( stored ) }</p>
+      <p>Context: { JSON.stringify( content ) }</p>
+    </div>
+    :null)
+}
+
+export default BlockstackContext
