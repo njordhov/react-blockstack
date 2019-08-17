@@ -1,33 +1,34 @@
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.BlockstackContext = undefined;
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _jsx = function () { var REACT_ELEMENT_TYPE = typeof Symbol === "function" && Symbol.for && Symbol.for("react.element") || 0xeac7; return function createRawReactElement(type, props, key, children) { var defaultProps = type && type.defaultProps; var childrenLength = arguments.length - 3; if (!props && childrenLength !== 0) { props = {}; } if (props && defaultProps) { for (var propName in defaultProps) { if (props[propName] === void 0) { props[propName] = defaultProps[propName]; } } } else if (!props) { props = defaultProps || {}; } if (childrenLength === 1) { props.children = children; } else if (childrenLength > 1) { var childArray = Array(childrenLength); for (var i = 0; i < childrenLength; i++) { childArray[i] = arguments[i + 3]; } props.children = childArray; } return { $$typeof: REACT_ELEMENT_TYPE, type: type, key: key === undefined ? null : '' + key, ref: null, props: props, _owner: null }; }; }();
-
 exports.useBlockstackContext = useBlockstackContext;
 exports.setContext = setContext;
 exports.initBlockstackContext = initBlockstackContext;
 exports.Blockstack = Blockstack;
 exports.Persistent = Persistent;
+exports["default"] = exports.BlockstackContext = void 0;
 
-var _react = require('react');
+var _react = _interopRequireWildcard(require("react"));
 
-var _react2 = _interopRequireDefault(_react);
+var _blockstack = require("blockstack");
 
-var _blockstack = require('blockstack');
+var _reactAtom = require("@dbeining/react-atom");
 
-var _reactAtom = require('@dbeining/react-atom');
+var _lodash = require("lodash");
 
-var _lodash = require('lodash');
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj["default"] = obj; return newObj; } }
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 var contextAtom = _reactAtom.Atom.of({});
 
@@ -60,22 +61,27 @@ function handleSignOut(e) {
 
   e.preventDefault();
   userSession.signUserOut();
-  var update = { userData: null,
+  var update = {
+    userData: null,
     handleSignIn: handleSignIn,
-    handleSignOut: null };
+    handleSignOut: null
+  };
   setContext(update);
   document.documentElement.classList.remove("user-signed-in");
 }
 
-var BlockstackContext = exports.BlockstackContext = (0, _react.createContext)(null);
+var BlockstackContext = (0, _react.createContext)(null);
+exports.BlockstackContext = BlockstackContext;
 
 function handleAuthenticated(userData) {
   console.log("Signed In");
   window.history.replaceState({}, document.title, "/");
-  var update = { userData: userData,
+  var update = {
+    userData: userData,
     person: new _blockstack.Person(userData.profile),
     handleSignIn: null,
-    handleSignOut: handleSignOut };
+    handleSignOut: handleSignOut
+  };
   setContext(update);
 }
 
@@ -86,11 +92,15 @@ function initBlockstackContext(options) {
 
   if (!userSession) {
     var _userSession = new _blockstack.UserSession(options);
-    var update = { userSession: _userSession,
+
+    var update = {
+      userSession: _userSession,
       userData: null,
       handleSignIn: handleSignIn,
-      handleSignOut: null };
+      handleSignOut: null
+    };
     setContext(update);
+
     if (_userSession.isSignInPending()) {
       _userSession.handlePendingSignIn().then(handleAuthenticated);
     } else if (_userSession.isUserSignedIn()) {
@@ -101,26 +111,27 @@ function initBlockstackContext(options) {
 
 function Blockstack(props) {
   var context = useBlockstackContext();
-  return _jsx(BlockstackContext.Provider, {
+  return _react["default"].createElement(BlockstackContext.Provider, {
     value: context
-  }, void 0, props.children);
+  }, props.children);
 }
-
 /* Persistent Context */
+
 
 function useStateWithLocalStorage(storageKey) {
   var stored = localStorage.getItem(storageKey);
   var content = typeof stored != 'undefined' ? JSON.parse(stored) : null;
-  console.log("PERSISTENT local:", stored, typeof stored === 'undefined' ? 'undefined' : _typeof(stored));
+  console.log("PERSISTENT local:", stored, _typeof(stored));
 
   var _useState = (0, _react.useState)(content),
       _useState2 = _slicedToArray(_useState, 2),
       value = _useState2[0],
       setValue = _useState2[1];
 
-  _react2.default.useEffect(function () {
+  _react["default"].useEffect(function () {
     localStorage.setItem(storageKey, JSON.stringify(value || null));
   }, [value]);
+
   return [value, setValue];
 }
 
@@ -130,16 +141,17 @@ function useStateWithGaiaStorage(userSession, path) {
       value = _useState4[0],
       setValue = _useState4[1];
 
-  console.log("PERSISTENT = ", value);
-  // React roadmap is to support data loading with Suspense hook
+  console.log("PERSISTENT = ", value); // React roadmap is to support data loading with Suspense hook
+
   if ((0, _lodash.isNil)(value)) {
     userSession.getFile(path).then(function (stored) {
       console.log("PERSISTENT Get:", path, value, stored);
       var content = !(0, _lodash.isNil)(stored) ? JSON.parse(stored) : {};
       setValue(content);
     });
-  }
-  // ##FIX: Saves initially loaded value (use updated React.Suspense hook when available)
+  } // ##FIX: Saves initially loaded value (use updated React.Suspense hook when available)
+
+
   (0, _react.useEffect)(function () {
     if (!(0, _lodash.isNil)(value)) {
       console.log("PERSISTENT Put:", path, JSON.stringify(value));
@@ -168,26 +180,31 @@ function Persistent(props) {
   (0, _react.useEffect)(function () {
     if (stored && !(0, _lodash.isEqual)(content, stored)) {
       console.log("PERSISTENT Set:", content, stored);
+
       if (version != stored.version) {
         // ## Fix: better handling of version including migration
         console.log("Mismatching version in file", path, " - expected", version, "got", stored.version);
       }
+
       var entry = {};
       entry[property] = stored.content;
       setContext(entry);
     }
   }, [stored]);
-
   (0, _react.useEffect)(function () {
     if (!(0, _lodash.isEqual)(content, stored)) {
       console.log("PERSISTENT save:", content, stored);
-      setStored({ version: version, property: property, content: content });
+      setStored({
+        version: version,
+        property: property,
+        content: content
+      });
     } else {
       console.log("PERSISTENT noop:", content, stored);
     }
   }, [content]);
-
-  return props.debug ? _jsx('div', {}, void 0, _jsx('h1', {}, void 0, 'Persistent ', property), _jsx('p', {}, void 0, 'Stored: ', JSON.stringify(stored)), _jsx('p', {}, void 0, 'Context: ', JSON.stringify(content))) : null;
+  return props.debug ? _react["default"].createElement("div", null, _react["default"].createElement("h1", null, "Persistent ", property), _react["default"].createElement("p", null, "Stored: ", JSON.stringify(stored)), _react["default"].createElement("p", null, "Context: ", JSON.stringify(content))) : null;
 }
 
-exports.default = BlockstackContext;
+var _default = BlockstackContext;
+exports["default"] = _default;
