@@ -2,10 +2,7 @@
   "name": "react-blockstack-context",
   "version": "0.1.0",
   "description": "React context for the Blockstack SDK",
-  "main": "index.jsx",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "main": "dist",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/njordhov/react-blockstack-context.git"
@@ -20,9 +17,26 @@
     "url": "https://github.com/njordhov/react-blockstack-context/issues"
   },
   "homepage": "https://github.com/njordhov/react-blockstack-context#readme",
-  "dependencies": {
+  "peerDependencies": {
     "@dbeining/react-atom": "^4.1.1",
     "blockstack": "^19.2.5",
-    "react": "^16.8.0"
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-react-optimize": "^1.0.1",
+    "babel-runtime": "^6.26.0",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0"
+  },
+  "scripts": {
+    "build": "babel src --out-dir dist"
   }
 }

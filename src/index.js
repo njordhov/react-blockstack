@@ -75,7 +75,7 @@ export function Blockstack(props) {
 function useStateWithLocalStorage (storageKey) {
   const stored = localStorage.getItem(storageKey)
   const content = (typeof stored != 'undefined') ? JSON.parse(stored) : null
-  console.log("Stored:", stored, typeof stored)
+  console.log("PERSISTENT local:", stored, typeof stored)
   const [value, setValue] = useState(content)
   React.useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(value || null));
@@ -85,12 +85,12 @@ function useStateWithLocalStorage (storageKey) {
 
 function useStateWithGaiaStorage (userSession, path) {
   const [value, setValue] = useState(null)
-  console.log("Persistent = ", value)
+  console.log("PERSISTENT = ", value)
   // React roadmap is to support data loading with Suspense hook
   if ( isNil(value) ) {
     userSession.getFile(path)
       .then(stored => {
-           console.log("PERSISTENT get:", path, value, stored)
+           console.log("PERSISTENT Get:", path, value, stored)
            const content = !isNil(stored) ? JSON.parse(stored) : {}
            setValue(content)
           })
@@ -140,7 +140,7 @@ export function Persistent (props) {
   return (
     props.debug ?
     <div>
-      <h1>Persistent Context: {property}</h1>
+      <h1>Persistent {property}</h1>
       <p>Stored: { JSON.stringify( stored ) }</p>
       <p>Context: { JSON.stringify( content ) }</p>
     </div>
