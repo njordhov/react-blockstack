@@ -7,7 +7,7 @@
   "dependencies": {
     "blockstack": "^19.2.5",
     "react": "^16.8.6",
-    "react-blockstack-context": "^0.1.3",
+    "react-blockstack-context": "^0.1.4",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.0"
   },

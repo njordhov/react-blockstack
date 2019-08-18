@@ -16,23 +16,21 @@ export function setContext(update) {
 
 function handleSignIn(e) {
   const { userSession } = deref(contextAtom)
-  e.preventDefault();
+  e.preventDefault()
+  const update = {handleSignIn: null}
+  setContext( update )
   userSession.redirectToSignIn();
 }
 
 function handleSignOut(e) {
   const { userSession } = deref(contextAtom)
-  e.preventDefault();
-  userSession.signUserOut();
+  e.preventDefault()
+  userSession.signUserOut()
   const update = { userData: null,
                    handleSignIn: handleSignIn,
                    handleSignOut: null}
   setContext( update )
 }
-
-export const BlockstackContext = createContext({userData: null,
-                                                handleSignIn: null,
-                                                handleSignOut: null})
 
 function handleAuthenticated (userData) {
   window.history.replaceState({}, document.title, "/")
@@ -66,6 +64,10 @@ export function Blockstack(props) {
             {props.children}
           </BlockstackContext.Provider>
 }
+
+export const BlockstackContext = createContext({userData: null,
+                                                handleSignIn: null,
+                                                handleSignOut: null})
 
 /* Persistent Context */
 
