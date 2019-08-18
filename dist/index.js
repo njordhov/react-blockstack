@@ -47,7 +47,11 @@ function handleSignIn(e) {
   var _deref = (0, _reactAtom.deref)(contextAtom),
       userSession = _deref.userSession;
 
-  e.preventDefault();
+  if (e) e.preventDefault();
+  var update = {
+    handleSignIn: null
+  };
+  setContext(update);
   userSession.redirectToSignIn();
 }
 
@@ -55,22 +59,16 @@ function handleSignOut(e) {
   var _deref2 = (0, _reactAtom.deref)(contextAtom),
       userSession = _deref2.userSession;
 
-  e.preventDefault();
-  userSession.signUserOut();
+  if (e) e.preventDefault();
   var update = {
     userData: null,
     handleSignIn: handleSignIn,
-    handleSignOut: null
+    handleSignOut: null,
+    person: null
   };
   setContext(update);
+  userSession.signUserOut();
 }
-
-var BlockstackContext = (0, _react.createContext)({
-  userData: null,
-  handleSignIn: null,
-  handleSignOut: null
-});
-exports.BlockstackContext = BlockstackContext;
 
 function handleAuthenticated(userData) {
   window.history.replaceState({}, document.title, "/");
@@ -114,8 +112,15 @@ function Blockstack(props) {
     value: context
   }, props.children);
 }
+
+var BlockstackContext = (0, _react.createContext)({
+  userData: null,
+  handleSignIn: null,
+  handleSignOut: null
+});
 /* Persistent Context */
 
+exports.BlockstackContext = BlockstackContext;
 
 function useStateWithLocalStorage(storageKey) {
   var stored = localStorage.getItem(storageKey);
