@@ -4,6 +4,10 @@
   "description": "A simple Blockstack app using ReactJS and react-blockstack-context",
   "author": "Terje Norderhaug",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/njordhov/react-blockstack-context.git"
+  },
   "dependencies": {
     "blockstack": "^19.2.5",
     "react": "^16.8.6",

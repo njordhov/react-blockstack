@@ -16,7 +16,7 @@ export function setContext(update) {
 
 function handleSignIn(e) {
   const { userSession } = deref(contextAtom)
-  e.preventDefault()
+  if (e) e.preventDefault()
   const update = {handleSignIn: null}
   setContext( update )
   userSession.redirectToSignIn();
@@ -24,13 +24,13 @@ function handleSignIn(e) {
 
 function handleSignOut(e) {
   const { userSession } = deref(contextAtom)
-  e.preventDefault()
-  userSession.signUserOut()
+  if (e) e.preventDefault()
   const update = { userData: null,
                    handleSignIn: handleSignIn,
                    handleSignOut: null,
-                   person: null}
+                   person: null }
   setContext( update )
+  userSession.signUserOut()
 }
 
 function handleAuthenticated (userData) {
@@ -38,7 +38,7 @@ function handleAuthenticated (userData) {
   const update = { userData: userData,
                    person: new Person(userData.profile),
                    handleSignIn: null,
-                   handleSignOut: handleSignOut}
+                   handleSignOut: handleSignOut }
   setContext( update )
 }
 
