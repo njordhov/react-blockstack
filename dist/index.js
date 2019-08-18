@@ -148,18 +148,28 @@ function useStateWithGaiaStorage(userSession, path) {
   console.log("PERSISTENT = ", value); // React roadmap is to support data loading with Suspense hook
 
   if ((0, _lodash.isNil)(value)) {
-    userSession.getFile(path).then(function (stored) {
-      console.log("PERSISTENT Get:", path, value, stored);
-      var content = !(0, _lodash.isNil)(stored) ? JSON.parse(stored) : {};
-      setValue(content);
-    });
+    if (userSession.isUserSignedIn()) {
+      userSession.getFile(path).then(function (stored) {
+        console.log("PERSISTENT Get:", path, value, stored);
+        var content = !(0, _lodash.isNil)(stored) ? JSON.parse(stored) : {};
+        setValue(content);
+      })["catch"](function (err) {
+        console.log("PERSISTENT Get Error:", err);
+      });
+    } else {
+      console.log("PERSISTENT Get Fail: user not yet logged in");
+    }
   } // ##FIX: Saves initially loaded value (use updated React.Suspense hook when available)
 
 
   (0, _react.useEffect)(function () {
     if (!(0, _lodash.isNil)(value)) {
-      console.log("PERSISTENT Put:", path, JSON.stringify(value));
-      userSession.putFile(path, JSON.stringify(value));
+      if (!userSession.isUserSignedIn()) {
+        console.log("PERSISTENT Put Fail: user no longer logged in");
+      } else {
+        console.log("PERSISTENT Put:", path, JSON.stringify(value));
+        userSession.putFile(path, JSON.stringify(value));
+      }
     }
   });
   return [value, setValue];
