@@ -12,4 +12,4 @@ import'./styles/style.css';
 const appConfig = new AppConfig()
 initBlockstackContext(appConfig)
 
-ReactDOM.render(<Blockstack><Router><App /></Router></Blockstack>, document.getElementById('root'));
+ReactDOM.render(<Router><Blockstack><App /></Blockstack></Router>, document.getElementById('root'));

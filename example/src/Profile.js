@@ -17,8 +17,7 @@ export default class Profile extends Component {
           <button
             className="btn btn-primary btn-lg"
             id="signout-button"
-            onClick={ handleSignOut.bind(this) }
-          >
+            onClick={ handleSignOut.bind(this) }>
             Logout
           </button>
         </p>

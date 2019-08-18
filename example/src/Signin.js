@@ -1,7 +1,7 @@
 import React from 'react';
 import { useBlockstackContext } from 'react-blockstack-context'
 
-// react hook
+// react function component
 
 export default function Signin () {
     const { handleSignIn } = useBlockstackContext()
