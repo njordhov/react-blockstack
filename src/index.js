@@ -6,6 +6,7 @@ import { isNil, isEqual, isFunction, merge } from 'lodash'
 const contextAtom = Atom.of({})
 
 export function useBlockstackContext () {
+  // ## RENAME to useBlockstack ?
   return( useAtom(contextAtom) )
 }
 
@@ -59,16 +60,16 @@ export function initBlockstackContext (options) {
   }
 }
 
+export const BlockstackContext = createContext({userData: null,
+                                                handleSignIn: null,
+                                                handleSignOut: null})
+
 export function Blockstack(props) {
    const context = useBlockstackContext()
    return <BlockstackContext.Provider value={context}>
             {props.children}
           </BlockstackContext.Provider>
 }
-
-export const BlockstackContext = createContext({userData: null,
-                                                handleSignIn: null,
-                                                handleSignOut: null})
 
 /* Persistent Context */
 
@@ -91,23 +92,23 @@ function useStateWithGaiaStorage (userSession, path) {
     if (userSession.isUserSignedIn()) {
         userSession.getFile(path)
         .then(stored => {
-             console.log("PERSISTENT Get:", path, value, stored)
+             console.info("PERSISTENT Get:", path, value, stored)
              const content = !isNil(stored) ? JSON.parse(stored) : {}
              setValue(content)
             })
          .catch(err => {
-           console.log("PERSISTENT Get Error:", err)
+           console.error("PERSISTENT Get Error:", err)
          })
       } else {
-        console.log("PERSISTENT Get Fail: user not yet logged in")
+        console.warn("PERSISTENT Get Fail: user not yet logged in")
     }}
   // ##FIX: Saves initially loaded value (use updated React.Suspense hook when available)
   useEffect(() => {
     if ( !isNil(value) ) {
          if (!userSession.isUserSignedIn()) {
-           console.log("PERSISTENT Put Fail: user no longer logged in")
+           console.warn("PERSISTENT Put Fail: user no longer logged in")
          } else {
-           console.log("PERSISTENT Put:", path, JSON.stringify(value))
+           console.info("PERSISTENT Put:", path, JSON.stringify(value))
            userSession.putFile(path, JSON.stringify(value))
          }
     }})
@@ -128,10 +129,10 @@ export function Persistent (props) {
   const content = property ? context[property] : null
   useEffect(() => {
     if (stored && !isEqual (content, stored)) {
-        console.log("PERSISTENT Set:", content, stored)
+        console.info("PERSISTENT Set:", content, stored)
         if (version != stored.version) {
           // ## Fix: better handling of version including migration
-          console.log("Mismatching version in file", path, " - expected", version, "got", stored.version)
+          console.error("Mismatching version in file", path, " - expected", version, "got", stored.version)
         }
         const entry = {}
         entry[property] = stored.content
@@ -140,7 +141,7 @@ export function Persistent (props) {
 
   useEffect(() => {
         if (!isEqual (content, stored)) {
-          console.log("PERSISTENT save:", content, stored)
+          console.info("PERSISTENT save:", content, stored)
           setStored({version: version, property: property, content: content})
         } else {
           console.log("PERSISTENT noop:", content, stored)

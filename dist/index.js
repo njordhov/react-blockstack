@@ -150,14 +150,14 @@ function useStateWithGaiaStorage(userSession, path) {
   if ((0, _lodash.isNil)(value)) {
     if (userSession.isUserSignedIn()) {
       userSession.getFile(path).then(function (stored) {
-        console.log("PERSISTENT Get:", path, value, stored);
+        console.info("PERSISTENT Get:", path, value, stored);
         var content = !(0, _lodash.isNil)(stored) ? JSON.parse(stored) : {};
         setValue(content);
       })["catch"](function (err) {
-        console.log("PERSISTENT Get Error:", err);
+        console.error("PERSISTENT Get Error:", err);
       });
     } else {
-      console.log("PERSISTENT Get Fail: user not yet logged in");
+      console.warn("PERSISTENT Get Fail: user not yet logged in");
     }
   } // ##FIX: Saves initially loaded value (use updated React.Suspense hook when available)
 
@@ -165,9 +165,9 @@ function useStateWithGaiaStorage(userSession, path) {
   (0, _react.useEffect)(function () {
     if (!(0, _lodash.isNil)(value)) {
       if (!userSession.isUserSignedIn()) {
-        console.log("PERSISTENT Put Fail: user no longer logged in");
+        console.warn("PERSISTENT Put Fail: user no longer logged in");
       } else {
-        console.log("PERSISTENT Put:", path, JSON.stringify(value));
+        console.info("PERSISTENT Put:", path, JSON.stringify(value));
         userSession.putFile(path, JSON.stringify(value));
       }
     }
@@ -193,11 +193,11 @@ function Persistent(props) {
   var content = property ? context[property] : null;
   (0, _react.useEffect)(function () {
     if (stored && !(0, _lodash.isEqual)(content, stored)) {
-      console.log("PERSISTENT Set:", content, stored);
+      console.info("PERSISTENT Set:", content, stored);
 
       if (version != stored.version) {
         // ## Fix: better handling of version including migration
-        console.log("Mismatching version in file", path, " - expected", version, "got", stored.version);
+        console.error("Mismatching version in file", path, " - expected", version, "got", stored.version);
       }
 
       var entry = {};
@@ -207,7 +207,7 @@ function Persistent(props) {
   }, [stored]);
   (0, _react.useEffect)(function () {
     if (!(0, _lodash.isEqual)(content, stored)) {
-      console.log("PERSISTENT save:", content, stored);
+      console.info("PERSISTENT save:", content, stored);
       setStored({
         version: version,
         property: property,
