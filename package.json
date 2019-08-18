@@ -1,11 +1,11 @@
 {
-  "name": "react-blockstack-context",
-  "version": "0.1.9",
+  "name": "react-blockstack",
+  "version": "0.2.0",
   "description": "React context for the Blockstack SDK",
   "main": "dist",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/njordhov/react-blockstack-context.git"
+    "url": "git+https://github.com/njordhov/react-blockstack.git"
   },
   "keywords": [
     "react",
@@ -14,9 +14,9 @@
   "author": "Terje Norderhaug",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/njordhov/react-blockstack-context/issues"
+    "url": "https://github.com/njordhov/react-blockstack/issues"
   },
-  "homepage": "https://github.com/njordhov/react-blockstack-context#readme",
+  "homepage": "https://github.com/njordhov/react-blockstack#readme",
   "dependencies": {
     "@dbeining/react-atom": "^4.1.1",
     "blockstack": "^19.2.5",

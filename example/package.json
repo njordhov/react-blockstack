@@ -1,17 +1,17 @@
 {
-  "name": "hello-blockstack-context",
+  "name": "hello-blockstack",
   "version": "0.0.0",
-  "description": "A simple Blockstack app using ReactJS and react-blockstack-context",
+  "description": "A simple Blockstack app using ReactJS",
   "author": "Terje Norderhaug",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/njordhov/react-blockstack-context.git"
+    "url": "git+https://github.com/njordhov/react-blockstack.git"
   },
   "dependencies": {
     "blockstack": "^19.2.5",
     "react": "^16.8.6",
-    "react-blockstack-context": "^0.1.9",
+    "react-blockstack": "^0.2.0",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.0"
   },

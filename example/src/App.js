@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Profile from './Profile.js';
 import Signin from './Signin.js';
-import BlockstackContext from 'react-blockstack-context'
+import BlockstackContext from 'react-blockstack'
 
 export default class App extends Component {
   render() {

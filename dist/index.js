@@ -7,6 +7,7 @@ exports.useBlockstackContext = useBlockstackContext;
 exports.setContext = setContext;
 exports.initBlockstackContext = initBlockstackContext;
 exports.Blockstack = Blockstack;
+exports.usePersistent = usePersistent;
 exports.Persistent = Persistent;
 exports["default"] = exports.BlockstackContext = void 0;
 
@@ -33,6 +34,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 var contextAtom = _reactAtom.Atom.of({});
 
 function useBlockstackContext() {
+  // ## RENAME to useBlockstack ?
   return (0, _reactAtom.useAtom)(contextAtom);
 }
 
@@ -106,21 +108,21 @@ function initBlockstackContext(options) {
   }
 }
 
+var BlockstackContext = (0, _react.createContext)({
+  userData: null,
+  handleSignIn: null,
+  handleSignOut: null
+});
+exports.BlockstackContext = BlockstackContext;
+
 function Blockstack(props) {
   var context = useBlockstackContext();
   return _react["default"].createElement(BlockstackContext.Provider, {
     value: context
   }, props.children);
 }
-
-var BlockstackContext = (0, _react.createContext)({
-  userData: null,
-  handleSignIn: null,
-  handleSignOut: null
-});
 /* Persistent Context */
 
-exports.BlockstackContext = BlockstackContext;
 
 function useStateWithLocalStorage(storageKey) {
   var stored = localStorage.getItem(storageKey);
@@ -175,22 +177,20 @@ function useStateWithGaiaStorage(userSession, path) {
   return [value, setValue];
 }
 
-function Persistent(props) {
-  // perhaps should only bind value to context for its children?
-  // ##FIX: validate input properties, particularly props.property
+function usePersistent(props) {
   var version = props.version || 0;
   var property = props.property;
   var path = props.path || property;
   var context = (0, _react.useContext)(BlockstackContext);
   var userSession = context.userSession,
       userData = context.userData;
+  var content = property ? context[property] : null;
 
-  var _ref = props.local ? useStateWithLocalStorage(props.path) : useStateWithGaiaStorage(userSession, props.path),
+  var _ref = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(userSession, path),
       _ref2 = _slicedToArray(_ref, 2),
       stored = _ref2[0],
       setStored = _ref2[1];
 
-  var content = property ? context[property] : null;
   (0, _react.useEffect)(function () {
     if (stored && !(0, _lodash.isEqual)(content, stored)) {
       console.info("PERSISTENT Set:", content, stored);
@@ -217,6 +217,18 @@ function Persistent(props) {
       console.log("PERSISTENT noop:", content, stored);
     }
   }, [content]);
+  return {
+    stored: stored
+  };
+}
+
+function Persistent(props) {
+  // perhaps should only bind value to context for its children?
+  // ##FIX: validate input properties, particularly props.property
+  var result = usePersistent(props);
+  var context = (0, _react.useContext)(BlockstackContext);
+  var property = props.property;
+  var content = property ? context[property] : null;
   return props.debug ? _react["default"].createElement("div", null, _react["default"].createElement("h1", null, "Persistent ", property), _react["default"].createElement("p", null, "Stored: ", JSON.stringify(stored)), _react["default"].createElement("p", null, "Context: ", JSON.stringify(content))) : null;
 }
 

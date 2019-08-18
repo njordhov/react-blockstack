@@ -1,5 +1,5 @@
 import React from 'react';
-import { useBlockstackContext } from 'react-blockstack-context'
+import { useBlockstackContext } from 'react-blockstack'
 
 // react function component
 

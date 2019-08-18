@@ -1,20 +1,20 @@
-# React Blockstack Context
+# React Blockstack
 
 Simplifies using Blockstack with React and eliminates many of the pitfalls.
 
 ## Example
 
-The [example](https://github.com/njordhov/react-blockstack-context/example/)
+The [example](https://github.com/njordhov/react-blockstack/example/)
 in the source repository is a reimplementation of the
 [Blockstack react template](https://github.com/blockstack/blockstack-app-generator).
-It demonstrates different ways of using Blockstack Context in place of hairy 
+It demonstrates different ways of using Blockstack Context in place of hairy
 code to deal with the mutable Blockstack api in react. As you can see,
 the example is substantially simplified compared to the original template.
 Feel free to use the example as a starting point for your own projects.
 
 ## Installation
 
-    npm install react-blockstack-context
+    npm install react-blockstack
 
 ## Blockstack Context
 
@@ -33,7 +33,7 @@ that the pass these properties through the component tree:
 Execute as early as possible to start the Blockstack authentication of the user.
 
 ````javascript
-import { initBlockstackContext } from 'react-blockstack-context'
+import { initBlockstackContext } from 'react-blockstack'
 
 initBlockstackContext()
 ````
@@ -47,7 +47,7 @@ that handles both signin and logout, adapting the label depending on status and
 is disabled while authentication is pending.
 
 ````javascript
-import { useBlockstackContext } from 'react-blockstack-context'
+import { useBlockstackContext } from 'react-blockstack'
 
 function Auth () {
     const { handleSignIn, handleSignOut } = useBlockstackContext()
@@ -79,7 +79,7 @@ Note the use of the `this.context` containing the properties and
 that the class is required to have `contextType = BlockstackContext`.
 
 ````javascript
-import BlockstackContext, { Blockstack } from 'react-blockstack-context'
+import BlockstackContext, { Blockstack } from 'react-blockstack'
 
 export default class App extends Component {
   render() {
