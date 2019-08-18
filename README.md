@@ -66,7 +66,9 @@ Enclose elements in a shared Blockstack context:
                     document.getElementById('app-root'))
 
 The context will be implicitly passed through the component tree.
-The element will automatically be updated whenever there is a change to the context.
+
+The APP component below will automatically be updated whenever there is a
+change to the context.
 Note the use of the `this.context` containing the properties and
 that the class is required to have `contextType = BlockstackContext`.
 
@@ -90,5 +92,4 @@ export default class App extends Component {
 App.contextType = BlockstackContext
 ````
 
-Note that if you have multiple Blockstack elements they will
-all share the same context.
+If there are multiple Blockstack elements they will all share the same context. 
