@@ -16,11 +16,11 @@ This component handles Blockstack authentication and provides a
 [React context object](https://reactjs.org/docs/context.html)
 that the pass these properties through the component tree:
 
-* userSession (mutable Blockstack interface)
-* userData (Blockstack SDK when authenticated)
-* person (an authenticated Person instance containing the user profile)
-* handleSignin (null when logged in or pending)
-* handleSignout (null when not logged in or pending)
+* `userSession` (mutable Blockstack interface)
+* `userData` (Blockstack SDK when authenticated)
+* `person` (an authenticated Person instance containing the user profile)
+* `handleSignin` (null when logged in or pending)
+* `handleSignout` (null when not logged in or pending)
 
 ## Setup
 
