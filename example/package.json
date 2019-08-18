@@ -1,0 +1,40 @@
+{
+  "name": "hello-blockstack-context",
+  "version": "0.0.0",
+  "description": "A simple Blockstack app using ReactJS and react-blockstack-context",
+  "author": "Terje Norderhaug",
+  "license": "MIT",
+  "dependencies": {
+    "blockstack": "^19.2.5",
+    "react": "^16.8.6",
+    "react-blockstack-context": "^0.1.1",
+    "react-dom": "^16.8.6",
+    "react-router-dom": "^4.3.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts build",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "bootstrap": "^4.3.1",
+    "react-test-renderer": "^16.8.6",
+    "react-scripts": "^3.1.1"
+  }
+}

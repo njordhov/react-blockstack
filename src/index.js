@@ -1,7 +1,7 @@
 import React, { Component, createContext, useState, useEffect, useContext } from 'react'
 import { UserSession, AppConfig, Person } from 'blockstack';
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
-import { isNil, isEqual, isFunction } from 'lodash'
+import { isNil, isEqual, isFunction, merge } from 'lodash'
 
 const contextAtom = Atom.of({})
 
@@ -9,11 +9,9 @@ export function useBlockstackContext () {
   return( useAtom(contextAtom) )
 }
 
-const merge = (obj1, obj2) => Object.assign ({}, obj1, obj2)
-
 export function setContext(update) {
   // use sparingly as it triggers all using components to update
-  swap(contextAtom, state => merge(state, isFunction(update) ? update(state) : update))
+  swap(contextAtom, state => merge({}, state, isFunction(update) ? update(state) : update))
 }
 
 function handleSignIn(e) {
@@ -30,13 +28,11 @@ function handleSignOut(e) {
                    handleSignIn: handleSignIn,
                    handleSignOut: null}
   setContext( update )
-  document.documentElement.classList.remove("user-signed-in")
 }
 
 export const BlockstackContext = createContext(null)
 
 function handleAuthenticated (userData) {
-  console.log("Signed In")
   window.history.replaceState({}, document.title, "/")
   const update = { userData: userData,
                    person: new Person(userData.profile),

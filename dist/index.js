@@ -36,14 +36,10 @@ function useBlockstackContext() {
   return (0, _reactAtom.useAtom)(contextAtom);
 }
 
-var merge = function merge(obj1, obj2) {
-  return Object.assign({}, obj1, obj2);
-};
-
 function setContext(update) {
   // use sparingly as it triggers all using components to update
   (0, _reactAtom.swap)(contextAtom, function (state) {
-    return merge(state, (0, _lodash.isFunction)(update) ? update(state) : update);
+    return (0, _lodash.merge)({}, state, (0, _lodash.isFunction)(update) ? update(state) : update);
   });
 }
 
@@ -67,14 +63,12 @@ function handleSignOut(e) {
     handleSignOut: null
   };
   setContext(update);
-  document.documentElement.classList.remove("user-signed-in");
 }
 
 var BlockstackContext = (0, _react.createContext)(null);
 exports.BlockstackContext = BlockstackContext;
 
 function handleAuthenticated(userData) {
-  console.log("Signed In");
   window.history.replaceState({}, document.title, "/");
   var update = {
     userData: userData,
