@@ -1,4 +1,4 @@
-# React Blockstack Context
+# React Blockstack
 
 Simplifies using Blockstack with React and eliminates many of the pitfalls.
 
