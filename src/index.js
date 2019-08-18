@@ -28,7 +28,8 @@ function handleSignOut(e) {
   userSession.signUserOut()
   const update = { userData: null,
                    handleSignIn: handleSignIn,
-                   handleSignOut: null}
+                   handleSignOut: null,
+                   person: null}
   setContext( update )
 }
 

@@ -82,7 +82,7 @@ export default class App extends Component {
     const personName = person && person.name && person.name()
     return(
       <div>
-        <img hidden={!avatarUrl} src={ avatarUrl } />
+        <img hidden={ !avatarUrl } src={ avatarUrl } />
         { personName }
         <Auth />
       </div>
@@ -92,4 +92,4 @@ export default class App extends Component {
 App.contextType = BlockstackContext
 ````
 
-If there are multiple Blockstack elements they will all share the same context. 
+If there are multiple Blockstack elements they will all share the same context.

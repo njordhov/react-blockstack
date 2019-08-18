@@ -7,7 +7,7 @@ export default class Profile extends Component {
   render() {
     const { handleSignOut, person } = this.props;
     return (
-      person && handleSignOut ?
+      person ?
       <div className="panel-welcome" id="section-2">
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
@@ -17,7 +17,8 @@ export default class Profile extends Component {
           <button
             className="btn btn-primary btn-lg"
             id="signout-button"
-            onClick={ handleSignOut.bind(this) }>
+            disabled={ !handleSignOut }
+            onClick={ handleSignOut }>
             Logout
           </button>
         </p>
