@@ -30,7 +30,9 @@ function handleSignOut(e) {
   setContext( update )
 }
 
-export const BlockstackContext = createContext(null)
+export const BlockstackContext = createContext({userData: null,
+                                                handleSignIn: null,
+                                                handleSignOut: null})
 
 function handleAuthenticated (userData) {
   window.history.replaceState({}, document.title, "/")
@@ -46,15 +48,14 @@ export function initBlockstackContext (options) {
   const { userSession } = deref(contextAtom)
   if (!userSession) {
     const userSession = new UserSession(options)
-    const update = {userSession: userSession,
-                    userData: null,
-                    handleSignIn: handleSignIn,
-                    handleSignOut: null}
+    const update = {userSession: userSession}
     setContext( update )
     if (userSession.isSignInPending()) {
       userSession.handlePendingSignIn().then( handleAuthenticated )
     } else if (userSession.isUserSignedIn()) {
       handleAuthenticated (userSession.loadUserData())
+    } else {
+      setContext( { handleSignIn: handleSignIn })
     }
   }
 }

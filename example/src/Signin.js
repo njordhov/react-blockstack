@@ -1,23 +1,22 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { useBlockstackContext } from 'react-blockstack-context'
 
-export default class Signin extends Component {
+// react hook
 
-  render() {
-    const { handleSignIn } = this.props;
-
+export default function Signin () {
+    const { handleSignIn } = useBlockstackContext()
     return (
-      <div className="panel-landing" id="section-1">
+      <div hidden={!handleSignIn} className="panel-landing" id="section-1">
         <h1 className="landing-heading">Hello, Blockstack!</h1>
         <p className="lead">
           <button
             className="btn btn-primary btn-lg"
             id="signin-button"
-            onClick={ handleSignIn.bind(this) }
-          >
+            disabled={ !handleSignIn }
+            onClick={ handleSignIn }>
             Sign In with Blockstack
           </button>
         </p>
       </div>
-    );
-  }
+    )
 }

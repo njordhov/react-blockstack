@@ -1,48 +1,19 @@
 import React, { Component } from 'react';
 import Profile from './Profile.js';
 import Signin from './Signin.js';
-import {
-  UserSession,
-  AppConfig
-} from 'blockstack';
-
-const appConfig = new AppConfig()
-const userSession = new UserSession({ appConfig: appConfig })
+import BlockstackContext from 'react-blockstack-context'
 
 export default class App extends Component {
-
-  handleSignIn(e) {
-    e.preventDefault();
-    userSession.redirectToSignIn();
-  }
-
-  handleSignOut(e) {
-    e.preventDefault();
-    userSession.signUserOut(window.location.origin);
-  }
-
   render() {
+    const { handleSignOut, handleSignIn, person } = this.context
     return (
       <div className="site-wrapper">
         <div className="site-wrapper-inner">
-          { userSession.isUserSignedIn()
-            ? <Profile userSession={userSession} handleSignOut={ this.handleSignOut } />
-            : !userSession.isSignInPending()
-            ? <Signin userSession={userSession} handleSignIn={ this.handleSignIn } />
-            : null
-          }
+           <Profile person={ person } handleSignOut={ handleSignOut } />
+           <Signin handleSignIn={ handleSignIn } />
         </div>
       </div>
     );
   }
-
-  componentDidMount() {
-    if (userSession.isSignInPending()) {
-      userSession.handlePendingSignIn().then((userData) => {
-        // window.location = window.location.origin;
-        window.history.replaceState({}, document.title, "/")
-        this.setState({ userData: userData})
-      });
-    }
-  }
 }
+App.contextType = BlockstackContext

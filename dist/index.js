@@ -65,7 +65,11 @@ function handleSignOut(e) {
   setContext(update);
 }
 
-var BlockstackContext = (0, _react.createContext)(null);
+var BlockstackContext = (0, _react.createContext)({
+  userData: null,
+  handleSignIn: null,
+  handleSignOut: null
+});
 exports.BlockstackContext = BlockstackContext;
 
 function handleAuthenticated(userData) {
@@ -88,10 +92,7 @@ function initBlockstackContext(options) {
     var _userSession = new _blockstack.UserSession(options);
 
     var update = {
-      userSession: _userSession,
-      userData: null,
-      handleSignIn: handleSignIn,
-      handleSignOut: null
+      userSession: _userSession
     };
     setContext(update);
 
@@ -99,6 +100,10 @@ function initBlockstackContext(options) {
       _userSession.handlePendingSignIn().then(handleAuthenticated);
     } else if (_userSession.isUserSignedIn()) {
       handleAuthenticated(_userSession.loadUserData());
+    } else {
+      setContext({
+        handleSignIn: handleSignIn
+      });
     }
   }
 }

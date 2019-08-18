@@ -64,4 +64,5 @@ export default class App extends Component {
   }
 }
 
+App.contextType = BlockstackContext
 ````

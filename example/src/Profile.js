@@ -1,31 +1,13 @@
 import React, { Component } from 'react';
-import {
-  Person,
-} from 'blockstack';
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 
 export default class Profile extends Component {
-  constructor(props) {
-  	super(props);
-
-  	this.state = {
-  	  person: {
-  	  	name() {
-          return 'Anonymous';
-        },
-  	  	avatarUrl() {
-  	  	  return avatarFallbackImage;
-  	  	},
-  	  },
-  	};
-  }
 
   render() {
-    const { handleSignOut, userSession } = this.props;
-    const { person } = this.state;
+    const { handleSignOut, person } = this.props;
     return (
-      !userSession.isSignInPending() ?
+      person && handleSignOut ?
       <div className="panel-welcome" id="section-2">
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
@@ -42,12 +24,5 @@ export default class Profile extends Component {
         </p>
       </div> : null
     );
-  }
-
-  componentWillMount() {
-    const { userSession } = this.props;
-    this.setState({
-      person: new Person(userSession.loadUserData().profile),
-    });
   }
 }

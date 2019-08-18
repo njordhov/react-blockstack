@@ -1,3 +1,4 @@
 node_modules
 package-lock.json
 react-blockstack-context-*.tgz
+.DS_Store
