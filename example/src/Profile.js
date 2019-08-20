@@ -3,7 +3,7 @@ import { useBlockstackContext } from 'react-blockstack'
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 
-export function Profile (props) {
+export default function Profile (props) {
   const { handleSignOut, person } = useBlockstackContext()
   return (
     person ?

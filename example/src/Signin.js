@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { Component } from 'react';
 import BlockstackContext from 'react-blockstack'
 
 export default class Signin extends Component {
-  render()
+  render() {
     const { handleSignIn } = this.context
     return (
       <div hidden={!handleSignIn} className="panel-landing" id="section-1">

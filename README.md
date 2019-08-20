@@ -4,7 +4,7 @@ Simplifies using Blockstack with React and eliminates many of the pitfalls.
 
 ## Example
 
-The [example](https://github.com/njordhov/react-blockstack/example/)
+The [example](https://github.com/njordhov/react-blockstack/tree/master/example)
 in the source repository is a reimplementation of the
 [Blockstack react template](https://github.com/blockstack/blockstack-app-generator).
 It demonstrates different ways of using Blockstack Context in place of hairy
