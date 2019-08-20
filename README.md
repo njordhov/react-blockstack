@@ -20,11 +20,11 @@ Feel free to use the example as a starting point for your own projects.
 
 This component handles Blockstack authentication and provides a
 [React context object](https://reactjs.org/docs/context.html)
-that the pass these properties through the component tree:
+that pass these properties through the component tree:
 
 * `userSession` (mutable Blockstack interface)
 * `userData` (Blockstack SDK when authenticated)
-* `person` (an authenticated Person instance containing the user profile)
+* `person` (if authenticated, a Person instance containing the user profile)
 * `handleSignin` (null when logged in or pending)
 * `handleSignout` (null when not logged in or pending)
 
@@ -64,7 +64,7 @@ To include the button in jsx:
 
     <Auth />
 
-## Blockstack Context Elements
+## Blockstack Context
 
 Enclose elements in a shared Blockstack context:
 
@@ -73,13 +73,13 @@ Enclose elements in a shared Blockstack context:
 
 The context will be implicitly passed through the component tree.
 
-The APP component below will automatically be updated whenever there is a
+The App component below will automatically be updated whenever there is a
 change to the context.
 Note the use of the `this.context` containing the properties and
 that the class is required to have `contextType = BlockstackContext`.
 
 ````javascript
-import BlockstackContext, { Blockstack } from 'react-blockstack'
+import BlockstackContext from 'react-blockstack'
 
 export default class App extends Component {
   render() {

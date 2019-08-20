@@ -9,6 +9,8 @@ exports.initBlockstackContext = initBlockstackContext;
 exports.Blockstack = Blockstack;
 exports.usePersistent = usePersistent;
 exports.Persistent = Persistent;
+exports.useAppManifest = useAppManifest;
+exports.AuthenticatedDocumentClass = AuthenticatedDocumentClass;
 exports["default"] = exports.BlockstackContext = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
@@ -35,11 +37,13 @@ var contextAtom = _reactAtom.Atom.of({});
 
 function useBlockstackContext() {
   // ## RENAME to useBlockstack ?
+  console.log("useBlockstackContext");
   return (0, _reactAtom.useAtom)(contextAtom);
 }
 
 function setContext(update) {
   // use sparingly as it triggers all using components to update
+  console.log("setContext");
   (0, _reactAtom.swap)(contextAtom, function (state) {
     return (0, _lodash.merge)({}, state, (0, _lodash.isFunction)(update) ? update(state) : update);
   });
@@ -173,7 +177,7 @@ function useStateWithGaiaStorage(userSession, path) {
         userSession.putFile(path, JSON.stringify(value));
       }
     }
-  });
+  }, [value]);
   return [value, setValue];
 }
 
@@ -206,7 +210,7 @@ function usePersistent(props) {
     }
   }, [stored]);
   (0, _react.useEffect)(function () {
-    if (!(0, _lodash.isEqual)(content, stored)) {
+    if (!(0, _lodash.isEqual)(content, stored && stored.content)) {
       console.info("PERSISTENT save:", content, stored);
       setStored({
         version: version,
@@ -230,6 +234,71 @@ function Persistent(props) {
   var property = props.property;
   var content = property ? context[property] : null;
   return props.debug ? _react["default"].createElement("div", null, _react["default"].createElement("h1", null, "Persistent ", property), _react["default"].createElement("p", null, "Stored: ", JSON.stringify(stored)), _react["default"].createElement("p", null, "Context: ", JSON.stringify(content))) : null;
+}
+/* External Dapps */
+
+
+function useAppManifest(appUri) {
+  // null when pending
+  var _useState5 = (0, _react.useState)(null),
+      _useState6 = _slicedToArray(_useState5, 2),
+      value = _useState6[0],
+      setValue = _useState6[1]; // ## FIX bug: May start another request while pending for a response
+
+
+  (0, _react.useEffect)(function () {
+    // #FIX: consider useCallback instead
+    try {
+      var manifestUri = appUri + "/manifest.json";
+      var controller = new AbortController();
+
+      var cleanup = function cleanup() {
+        return controller.abort();
+      };
+
+      console.info("FETCHING:", manifestUri);
+      fetch(manifestUri, {
+        signal: controller.signal
+      }).then(function (response) {
+        response.json().then(setValue);
+      })["catch"](function (err) {
+        console.warn("Failed to get manifest for:", appUri, err);
+        setValue({
+          error: err
+        });
+      }); // .finally (() => setValue({}))
+
+      return cleanup;
+    } catch (err) {
+      console.warn("Failed fetching when mounting:", err);
+      setValue({
+        error: err
+      });
+    }
+  }, [appUri]);
+  return value;
+}
+/* Update document element class  */
+
+
+function AuthenticatedDocumentClass(props) {
+  // declare a classname decorating the document element when authenticated
+  var className = props.name;
+
+  var _useBlockstackContext = useBlockstackContext(),
+      userData = _useBlockstackContext.userData;
+
+  (0, _react.useEffect)(function () {
+    console.log("Updating documentElement classes to reflect signed in status:", !!userData);
+
+    if (userData) {
+      document.documentElement.classList.add(className);
+      document.documentElement.classList.remove('reloading');
+    } else {
+      document.documentElement.classList.remove(className);
+    }
+  }, [userData]);
+  return null;
 }
 
 var _default = BlockstackContext;

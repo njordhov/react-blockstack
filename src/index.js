@@ -7,11 +7,13 @@ const contextAtom = Atom.of({})
 
 export function useBlockstackContext () {
   // ## RENAME to useBlockstack ?
+  console.log("useBlockstackContext")
   return( useAtom(contextAtom) )
 }
 
 export function setContext(update) {
   // use sparingly as it triggers all using components to update
+  console.log("setContext")
   swap(contextAtom, state => merge({}, state, isFunction(update) ? update(state) : update))
 }
 
@@ -111,7 +113,7 @@ function useStateWithGaiaStorage (userSession, path) {
            console.info("PERSISTENT Put:", path, JSON.stringify(value))
            userSession.putFile(path, JSON.stringify(value))
          }
-    }})
+    }},[value])
   return [value, setValue]
 }
 
@@ -138,7 +140,7 @@ export function usePersistent (props){
     }}, [stored])
 
     useEffect(() => {
-          if (!isEqual (content, stored)) {
+          if (!isEqual (content, stored && stored.content)) {
             console.info("PERSISTENT save:", content, stored)
             setStored({version: version, property: property, content: content})
           } else {
@@ -164,5 +166,48 @@ export function Persistent (props) {
     </div>
     :null)
 }
+
+/* External Dapps */
+
+export function useAppManifest (appUri) {
+    // null when pending
+    const [value, setValue] = useState(null)
+    // ## FIX bug: May start another request while pending for a response
+    useEffect(() => {  // #FIX: consider useCallback instead
+      try {
+        const manifestUri = appUri + "/manifest.json"
+        const controller = new AbortController()
+        const cleanup = () => controller.abort()
+        console.info("FETCHING:", manifestUri)
+        fetch(manifestUri, {signal: controller.signal})
+        .then ( response => {response.json().then( setValue )})
+        .catch ( err => {console.warn("Failed to get manifest for:", appUri, err)
+                         setValue({error: err})})
+        // .finally (() => setValue({}))
+        return (cleanup)
+      } catch (err) {
+        console.warn("Failed fetching when mounting:", err)
+        setValue({error: err})
+      }
+    }, [appUri])
+    return (value)
+  }
+
+/* Update document element class  */
+
+export function AuthenticatedDocumentClass (props) {
+    // declare a classname decorating the document element when authenticated
+    const className = props.name
+    const { userData } = useBlockstackContext()
+    useEffect(() => {
+      console.log("Updating documentElement classes to reflect signed in status:", !!userData)
+      if (userData) {
+          document.documentElement.classList.add(className)
+          document.documentElement.classList.remove('reloading')
+      } else {
+          document.documentElement.classList.remove(className)
+      }}, [userData])
+    return (null)
+    }
 
 export default BlockstackContext

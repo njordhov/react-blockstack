@@ -1,10 +1,11 @@
 var path = require('path');
 module.exports = {
   entry: './src/index.js',
+  target: 'web',
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'index.js',
-    libraryTarget: 'commonjs2' 
+    libraryTarget: 'commonjs2'
   },
   module: {
     rules: [

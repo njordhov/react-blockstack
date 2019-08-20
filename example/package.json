@@ -11,7 +11,7 @@
   "dependencies": {
     "blockstack": "^19.2.5",
     "react": "^16.8.6",
-    "react-blockstack": "^0.2.0",
+    "react-blockstack": "^0.2.1",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.0"
   },

@@ -1,8 +1,8 @@
 {
   "name": "react-blockstack",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "React context for the Blockstack SDK",
-  "main": "dist",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/njordhov/react-blockstack.git"
@@ -20,16 +20,15 @@
   "dependencies": {
     "@dbeining/react-atom": "^4.1.1",
     "blockstack": "^19.2.5",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0"
+    "react": "^16.8.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
-    "babel-loader": "^8.0.6",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
-    "@babel/runtime": "^7.5.5"
+    "@babel/runtime": "^7.5.5",
+    "babel-loader": "^8.0.6"
   },
   "scripts": {
     "build": "babel src --out-dir dist"
