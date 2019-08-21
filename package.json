@@ -20,7 +20,8 @@
   "dependencies": {
     "@dbeining/react-atom": "^4.1.1",
     "blockstack": "^19.2.5",
-    "react": "^16.8.0"
+    "react": "^16.8.0",
+    "lodash": "^4.17.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",

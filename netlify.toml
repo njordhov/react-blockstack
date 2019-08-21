@@ -1,0 +1,3 @@
+[build]
+  command = "cd example; npm install; npm run build; mv cors/* build"
+  publish = "example/build"
