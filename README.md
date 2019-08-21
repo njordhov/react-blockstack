@@ -34,12 +34,12 @@ that pass these properties through the component tree:
 
 ## Setup
 
-Execute as early as possible to start the Blockstack authentication of the user.
+Execute as early as possible to start the Blockstack authentication.
 
 ````javascript
-import { initBlockstackContext } from 'react-blockstack'
+import { initBlockstack } from 'react-blockstack'
 
-initBlockstackContext()
+initBlockstack()
 ````
 
 Optionally call with a Blockstack AppConfig.

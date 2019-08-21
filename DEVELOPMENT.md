@@ -10,10 +10,10 @@ https://www.npmjs.com/package/react-blockstack
 
 First test in the example or another local project (see other section).
 
-To publish a new version, first build the distribution and update the version:
+To publish a new version, first update the version build the distribution:
 
-    npm run build
     npm version [patch | minor | major]
+    npm run build
     npm publish
 
 # Test react-blockstack in a local project
