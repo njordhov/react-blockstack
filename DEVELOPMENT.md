@@ -8,19 +8,22 @@ The react-blockstack package is published at:
 
 https://www.npmjs.com/package/react-blockstack
 
+First test in the example or another local project (see other section).
+
 To publish a new version, first build the distribution and update the version:
 
     npm run build
     npm version [patch | minor | major]
     npm publish
 
-# Use react-blockstack in a local project
+# Test react-blockstack in a local project
 
 During development of this package, it can be used/tested in a local project
 without first publishing to npm (but see issues below).
 
 1. In this directory, execute:
 
+    npm run build
     npm link
 
 2. In the dependent project top directory, execute:

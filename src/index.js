@@ -3,7 +3,9 @@ import { UserSession, AppConfig, Person } from 'blockstack';
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
 import { isNil, isEqual, isFunction, merge } from 'lodash'
 
-const contextAtom = Atom.of({})
+const defaultValue = {userData: null, signIn: null, signOut: null}
+
+const contextAtom = Atom.of(defaultValue)
 
 export function useBlockstack () {
   return( useAtom(contextAtom) )
@@ -11,7 +13,6 @@ export function useBlockstack () {
 
 export function setContext(update) {
   // use sparingly as it triggers all using components to update
-  console.log("setContext")
   swap(contextAtom, state => merge({}, state, isFunction(update) ? update(state) : update))
 }
 
@@ -41,7 +42,7 @@ function handleAuthenticated (userData) {
   setContext( update )
 }
 
-export function initBlockstackContext (options) {
+export function initBlockstack (options) {
   // Idempotent - mention in documentation!
   const { userSession } = deref(contextAtom)
   if (!userSession) {
@@ -58,9 +59,7 @@ export function initBlockstackContext (options) {
   }
 }
 
-export const BlockstackContext = createContext({userData: null,
-                                                signIn: null,
-                                                signOut: null})
+export const BlockstackContext = createContext(defaultValue)
 
 export function Blockstack(props) {
    const context = useBlockstack()

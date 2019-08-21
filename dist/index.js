@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.useBlockstack = useBlockstack;
 exports.setContext = setContext;
-exports.initBlockstackContext = initBlockstackContext;
+exports.initBlockstack = initBlockstack;
 exports.Blockstack = Blockstack;
 exports.usePersistent = usePersistent;
 exports.Persistent = Persistent;
@@ -33,7 +33,13 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-var contextAtom = _reactAtom.Atom.of({});
+var defaultValue = {
+  userData: null,
+  signIn: null,
+  signOut: null
+};
+
+var contextAtom = _reactAtom.Atom.of(defaultValue);
 
 function useBlockstack() {
   return (0, _reactAtom.useAtom)(contextAtom);
@@ -41,7 +47,6 @@ function useBlockstack() {
 
 function setContext(update) {
   // use sparingly as it triggers all using components to update
-  console.log("setContext");
   (0, _reactAtom.swap)(contextAtom, function (state) {
     return (0, _lodash.merge)({}, state, (0, _lodash.isFunction)(update) ? update(state) : update);
   });
@@ -83,7 +88,7 @@ function handleAuthenticated(userData) {
   setContext(update);
 }
 
-function initBlockstackContext(options) {
+function initBlockstack(options) {
   // Idempotent - mention in documentation!
   var _deref3 = (0, _reactAtom.deref)(contextAtom),
       userSession = _deref3.userSession;
@@ -108,11 +113,7 @@ function initBlockstackContext(options) {
   }
 }
 
-var BlockstackContext = (0, _react.createContext)({
-  userData: null,
-  signIn: null,
-  signOut: null
-});
+var BlockstackContext = (0, _react.createContext)(defaultValue);
 exports.BlockstackContext = BlockstackContext;
 
 function Blockstack(props) {
