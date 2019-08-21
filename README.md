@@ -14,7 +14,7 @@ the example is substantially simplified compared to the original template.
 Feel free to use the example as a starting point for your own projects.
 
 Live at:
-[![Netlify Status](https://api.netlify.com/api/v1/badges/4c1f3c5b-c184-4659-935a-c66065978127/deploy-status)](https://app.netlify.com/sites/react-blockstack/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/4c1f3c5b-c184-4659-935a-c66065978127/deploy-status)](https://react-blockstack.netlify.com)
 
 ## Installation
 
