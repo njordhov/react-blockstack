@@ -7,10 +7,14 @@ Simplifies using Blockstack with React and eliminates many of the pitfalls.
 The [example](https://github.com/njordhov/react-blockstack/tree/master/example)
 in the source repository is a reimplementation of the
 [Blockstack react template](https://github.com/blockstack/blockstack-app-generator).
+
 It demonstrates different ways of using Blockstack Context in place of hairy
 code to deal with the mutable Blockstack api in react. As you can see,
 the example is substantially simplified compared to the original template.
 Feel free to use the example as a starting point for your own projects.
+
+Live at:
+[![Netlify Status](https://api.netlify.com/api/v1/badges/4c1f3c5b-c184-4659-935a-c66065978127/deploy-status)](https://app.netlify.com/sites/react-blockstack/deploys)
 
 ## Installation
 
