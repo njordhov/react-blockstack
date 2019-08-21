@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { useBlockstackContext } from 'react-blockstack'
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 
 export default function Profile (props) {
-  const { handleSignOut, person } = useBlockstackContext()
+  const { signOut, person } = useBlockstackContext()
   return (
     person ?
     <div className="panel-welcome" id="section-2">
@@ -16,8 +16,8 @@ export default function Profile (props) {
         <button
           className="btn btn-primary btn-lg"
           id="signout-button"
-          disabled={ !handleSignOut }
-          onClick={ handleSignOut }>
+          disabled={ !signOut }
+          onClick={ signOut }>
           Logout
         </button>
       </p>

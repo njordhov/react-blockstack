@@ -25,8 +25,8 @@ that pass these properties through the component tree:
 * `userSession` (mutable Blockstack interface)
 * `userData` (Blockstack SDK when authenticated)
 * `person` (if authenticated, a Person instance containing the user profile)
-* `handleSignin` (null when logged in or pending)
-* `handleSignout` (null when not logged in or pending)
+* `signIn` (null when logged in or pending)
+* `signOut` (null when not logged in or pending)
 
 ## Setup
 
@@ -50,11 +50,11 @@ is disabled while authentication is pending.
 import { useBlockstackContext } from 'react-blockstack'
 
 function Auth () {
-    const { handleSignIn, handleSignOut } = useBlockstackContext()
+    const { signIn, signOut } = useBlockstackContext()
     return (
-        <button disabled={ !handleSignIn && !handleSignOut }
-                onClick={ handleSignIn || handleSignOut }>
-            { handleSignIn ? "Sign In" : handleSignOut ? "Sign Out" : "Pending" }
+        <button disabled={ !signIn && !signOut }
+                onClick={ signIn || signOut }>
+            { signIn ? "Sign In" : signOut ? "Sign Out" : "Pending" }
         </button>
     )
 }
