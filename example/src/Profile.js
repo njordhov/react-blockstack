@@ -1,10 +1,10 @@
 import React from 'react';
-import { useBlockstackContext } from 'react-blockstack'
+import { useBlockstack} from 'react-blockstack'
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 
 export default function Profile (props) {
-  const { signOut, person } = useBlockstackContext()
+  const { signOut, person } = useBlockstack()
   return (
     person ?
     <div className="panel-welcome" id="section-2">

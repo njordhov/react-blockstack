@@ -5,9 +5,7 @@ import { isNil, isEqual, isFunction, merge } from 'lodash'
 
 const contextAtom = Atom.of({})
 
-export function useBlockstackContext () {
-  // ## RENAME to useBlockstack ?
-  console.log("useBlockstackContext")
+export function useBlockstack () {
   return( useAtom(contextAtom) )
 }
 
@@ -17,20 +15,18 @@ export function setContext(update) {
   swap(contextAtom, state => merge({}, state, isFunction(update) ? update(state) : update))
 }
 
-function handleSignIn(e) {
+function signIn(e) {
   const { userSession } = deref(contextAtom)
-  if (e) e.preventDefault()
-  const update = {handleSignIn: null}
+  const update = {signIn: null}
   setContext( update )
   userSession.redirectToSignIn();
 }
 
-function handleSignOut(e) {
+function signOut(e) {
   const { userSession } = deref(contextAtom)
-  if (e) e.preventDefault()
   const update = { userData: null,
-                   handleSignIn: handleSignIn,
-                   handleSignOut: null,
+                   signIn: signIn,
+                   signOut: null,
                    person: null }
   setContext( update )
   userSession.signUserOut()
@@ -40,8 +36,8 @@ function handleAuthenticated (userData) {
   window.history.replaceState({}, document.title, "/")
   const update = { userData: userData,
                    person: new Person(userData.profile),
-                   handleSignIn: null,
-                   handleSignOut: handleSignOut }
+                   signIn: null,
+                   signOut: signOut }
   setContext( update )
 }
 
@@ -50,24 +46,24 @@ export function initBlockstackContext (options) {
   const { userSession } = deref(contextAtom)
   if (!userSession) {
     const userSession = new UserSession(options)
-    const update = {userSession: userSession}
+    const update = { userSession: userSession }
     setContext( update )
     if (userSession.isSignInPending()) {
       userSession.handlePendingSignIn().then( handleAuthenticated )
     } else if (userSession.isUserSignedIn()) {
       handleAuthenticated (userSession.loadUserData())
     } else {
-      setContext( { handleSignIn: handleSignIn })
+      setContext( { signIn: signIn })
     }
   }
 }
 
 export const BlockstackContext = createContext({userData: null,
-                                                handleSignIn: null,
-                                                handleSignOut: null})
+                                                signIn: null,
+                                                signOut: null})
 
 export function Blockstack(props) {
-   const context = useBlockstackContext()
+   const context = useBlockstack()
    return <BlockstackContext.Provider value={context}>
             {props.children}
           </BlockstackContext.Provider>
@@ -198,7 +194,7 @@ export function useAppManifest (appUri) {
 export function AuthenticatedDocumentClass (props) {
     // declare a classname decorating the document element when authenticated
     const className = props.name
-    const { userData } = useBlockstackContext()
+    const { userData } = useBlockstack()
     useEffect(() => {
       console.log("Updating documentElement classes to reflect signed in status:", !!userData)
       if (userData) {

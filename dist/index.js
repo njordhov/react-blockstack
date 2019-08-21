@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.useBlockstackContext = useBlockstackContext;
+exports.useBlockstack = useBlockstack;
 exports.setContext = setContext;
 exports.initBlockstackContext = initBlockstackContext;
 exports.Blockstack = Blockstack;
@@ -35,9 +35,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 var contextAtom = _reactAtom.Atom.of({});
 
-function useBlockstackContext() {
-  // ## RENAME to useBlockstack ?
-  console.log("useBlockstackContext");
+function useBlockstack() {
   return (0, _reactAtom.useAtom)(contextAtom);
 }
 
@@ -49,27 +47,25 @@ function setContext(update) {
   });
 }
 
-function handleSignIn(e) {
+function signIn(e) {
   var _deref = (0, _reactAtom.deref)(contextAtom),
       userSession = _deref.userSession;
 
-  if (e) e.preventDefault();
   var update = {
-    handleSignIn: null
+    signIn: null
   };
   setContext(update);
   userSession.redirectToSignIn();
 }
 
-function handleSignOut(e) {
+function signOut(e) {
   var _deref2 = (0, _reactAtom.deref)(contextAtom),
       userSession = _deref2.userSession;
 
-  if (e) e.preventDefault();
   var update = {
     userData: null,
-    handleSignIn: handleSignIn,
-    handleSignOut: null,
+    signIn: signIn,
+    signOut: null,
     person: null
   };
   setContext(update);
@@ -81,8 +77,8 @@ function handleAuthenticated(userData) {
   var update = {
     userData: userData,
     person: new _blockstack.Person(userData.profile),
-    handleSignIn: null,
-    handleSignOut: handleSignOut
+    signIn: null,
+    signOut: signOut
   };
   setContext(update);
 }
@@ -106,7 +102,7 @@ function initBlockstackContext(options) {
       handleAuthenticated(_userSession.loadUserData());
     } else {
       setContext({
-        handleSignIn: handleSignIn
+        signIn: signIn
       });
     }
   }
@@ -114,13 +110,13 @@ function initBlockstackContext(options) {
 
 var BlockstackContext = (0, _react.createContext)({
   userData: null,
-  handleSignIn: null,
-  handleSignOut: null
+  signIn: null,
+  signOut: null
 });
 exports.BlockstackContext = BlockstackContext;
 
 function Blockstack(props) {
-  var context = useBlockstackContext();
+  var context = useBlockstack();
   return _react["default"].createElement(BlockstackContext.Provider, {
     value: context
   }, props.children);
@@ -285,8 +281,8 @@ function AuthenticatedDocumentClass(props) {
   // declare a classname decorating the document element when authenticated
   var className = props.name;
 
-  var _useBlockstackContext = useBlockstackContext(),
-      userData = _useBlockstackContext.userData;
+  var _useBlockstack = useBlockstack(),
+      userData = _useBlockstack.userData;
 
   (0, _react.useEffect)(function () {
     console.log("Updating documentElement classes to reflect signed in status:", !!userData);

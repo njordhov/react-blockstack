@@ -47,10 +47,10 @@ that handles both signin and logout, adapting the label depending on status and
 is disabled while authentication is pending.
 
 ````javascript
-import { useBlockstackContext } from 'react-blockstack'
+import { useBlockstack } from 'react-blockstack'
 
 function Auth () {
-    const { signIn, signOut } = useBlockstackContext()
+    const { signIn, signOut } = useBlockstack()
     return (
         <button disabled={ !signIn && !signOut }
                 onClick={ signIn || signOut }>
