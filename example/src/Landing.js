@@ -1,11 +1,10 @@
-import React, { Component } from 'react';
-import BlockstackContext from 'react-blockstack'
+import React from 'react';
+import { useBlockstack } from 'react-blockstack'
 
-export default class Signin extends Component {
-  render() {
-    const { signIn } = this.context
+export function Landing (props) {
+    const { signIn } = useBlockstack()
     return (
-      <div hidden={!signIn} className="panel-landing" id="section-1">
+      <div className="panel-landing" id="section-1">
         <h1 className="landing-heading">Hello, Blockstack!</h1>
         <p className="lead">
           <button
@@ -20,4 +19,3 @@ export default class Signin extends Component {
     )
   }
 }
-Signin.contextType = BlockstackContext

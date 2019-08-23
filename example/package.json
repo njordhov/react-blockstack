@@ -2,7 +2,7 @@
   "name": "hello-blockstack",
   "version": "0.0.0",
   "description": "A simple Blockstack app using ReactJS",
-  "author": "Terje Norderhaug",
+  "author": "",
   "license": "MIT",
   "repository": {
     "type": "git",

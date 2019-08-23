@@ -1,13 +1,15 @@
 import React from 'react';
+import { useBlockstack} from 'react-blockstack'
 import Profile from './Profile.js';
-import Signin from './Signin.js';
+import Landing from './Landing.js';
 
 export default function App (props) {
+  const { person } = useBlockstack()
   return (
     <div className="site-wrapper">
       <div className="site-wrapper-inner">
-         <Profile />
-         <Signin  />
+         {!person && <Landing />}
+         {person && <Profile person={person} />}
       </div>
     </div>
   )

@@ -1,16 +1,26 @@
 # React Blockstack
 
-Simplifies using Blockstack with React and eliminates many of the pitfalls.
+Use Blockstack with React, avoiding many of the pitfalls.
 
-## Example
+Handles Blockstack authentication and provides a
+`useBlockstack` React hook and an optional
+[React context object](https://reactjs.org/docs/context.html)
+that pass these properties to components:
+
+* `userSession` (Blockstack interface)
+* `userData` (when authenticated)
+* `signIn` (null when logged in or pending)
+* `signOut` (null when not logged in or pending)
+* `person` (if authenticated, a Person instance containing the user profile)
+
+## Live Demo
 
 The [example](https://github.com/njordhov/react-blockstack/tree/master/example)
 in the source repository is a reimplementation of the
-[Blockstack react template](https://github.com/blockstack/blockstack-app-generator).
+[Blockstack react template](https://github.com/blockstack/blockstack-app-generator/tree/master/react/templates).
 
 It demonstrates different ways of using Blockstack Context in place of hairy
-code to deal with the mutable Blockstack api in react. As you can see,
-the example is substantially simplified compared to the original template.
+code to deal with the mutable Blockstack api in react.
 Feel free to use the example as a starting point for your own projects.
 
 Live at:
@@ -19,18 +29,6 @@ Live at:
 ## Installation
 
     npm install react-blockstack
-
-## Blockstack Context
-
-This component handles Blockstack authentication and provides a
-[React context object](https://reactjs.org/docs/context.html)
-that pass these properties through the component tree:
-
-* `userSession` (mutable Blockstack interface)
-* `userData` (Blockstack SDK when authenticated)
-* `person` (if authenticated, a Person instance containing the user profile)
-* `signIn` (null when logged in or pending)
-* `signOut` (null when not logged in or pending)
 
 ## Setup
 
@@ -42,9 +40,16 @@ import { initBlockstack } from 'react-blockstack'
 initBlockstack()
 ````
 
-Optionally call with a Blockstack AppConfig.
+Optional argument: Blockstack AppConfig.
 
-## Using React Hook
+## React Hook for Function Components
+
+The package provides a `useBlockStack` React hook for use in function components.
+It provides access to the Blockstack SDK while implicitly handling the authentication:
+
+    const {userSession, userData, signIn, signOut, person} = useBlockstack()
+
+### Example
 
 Here is a react function component that implements an authentication button
 that handles both signin and logout, adapting the label depending on status and
@@ -68,14 +73,16 @@ To include the button in jsx:
 
     <Auth />
 
-## Blockstack Context
+## React Class Components
 
-Enclose elements in a shared Blockstack context:
+React hooks like `useBlockstack` can only be used inside function components.
+For conventional React class components, enclose elements in a shared Blockstack context:
 
     ReactDOM.render(<Blockstack><App /></Blockstack>,
                     document.getElementById('app-root'))
 
-The context will be implicitly passed through the component tree.
+The context will be implicitly passed through the component tree and can be
+used as any other React context.
 
 The App component below will automatically be updated whenever there is a
 change to the context.
