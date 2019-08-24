@@ -148,7 +148,7 @@ function useStateWithGaiaStorage(userSession, path) {
       value = _useState4[0],
       setValue = _useState4[1];
 
-  console.log("PERSISTENT = ", value); // React roadmap is to support data loading with Suspense hook
+  console.log("PERSISTENT ", path, " = ", value); // React roadmap is to support data loading with Suspense hook
 
   if ((0, _lodash.isNil)(value)) {
     if (userSession.isUserSignedIn()) {
@@ -179,8 +179,9 @@ function useStateWithGaiaStorage(userSession, path) {
 }
 
 function usePersistent(props) {
+  var property = props.property,
+      overwrite = props.overwrite;
   var version = props.version || 0;
-  var property = props.property;
   var path = props.path || property;
   var context = (0, _react.useContext)(BlockstackContext);
   var userSession = context.userSession,
@@ -193,6 +194,7 @@ function usePersistent(props) {
       setStored = _ref2[1];
 
   (0, _react.useEffect)(function () {
+    // Load data from file
     if (stored && !(0, _lodash.isEqual)(content, stored)) {
       console.info("PERSISTENT Set:", content, stored);
 
@@ -207,12 +209,14 @@ function usePersistent(props) {
     }
   }, [stored]);
   (0, _react.useEffect)(function () {
+    // Store content to file
     if (!(0, _lodash.isEqual)(content, stored && stored.content)) {
-      console.info("PERSISTENT save:", content, stored);
+      var replacement = overwrite ? content : (0, _lodash.merge)({}, stored.content, content);
+      console.info("PERSISTENT save:", content, replacement);
       setStored({
         version: version,
         property: property,
-        content: content
+        content: replacement
       });
     } else {
       console.log("PERSISTENT noop:", content, stored);
@@ -226,11 +230,13 @@ function usePersistent(props) {
 function Persistent(props) {
   // perhaps should only bind value to context for its children?
   // ##FIX: validate input properties, particularly props.property
+  var property = props.property,
+      debug = props.debug,
+      overwrite = props.overwrite;
   var result = usePersistent(props);
   var context = (0, _react.useContext)(BlockstackContext);
-  var property = props.property;
   var content = property ? context[property] : null;
-  return props.debug ? _react["default"].createElement("div", null, _react["default"].createElement("h1", null, "Persistent ", property), _react["default"].createElement("p", null, "Stored: ", JSON.stringify(stored)), _react["default"].createElement("p", null, "Context: ", JSON.stringify(content))) : null;
+  return debug ? _react["default"].createElement("div", null, _react["default"].createElement("h1", null, "Persistent ", property), _react["default"].createElement("p", null, "Stored: ", JSON.stringify(stored)), _react["default"].createElement("p", null, "Context: ", JSON.stringify(content))) : null;
 }
 /* External Dapps */
 
