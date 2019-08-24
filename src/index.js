@@ -83,7 +83,7 @@ function useStateWithLocalStorage (storageKey) {
 
 function useStateWithGaiaStorage (userSession, path) {
   const [value, setValue] = useState(null)
-  console.log("PERSISTENT = ", value)
+  console.log("PERSISTENT ", path, " = ", value)
   // React roadmap is to support data loading with Suspense hook
   if ( isNil(value) ) {
     if (userSession.isUserSignedIn()) {
@@ -113,47 +113,50 @@ function useStateWithGaiaStorage (userSession, path) {
 }
 
 export function usePersistent (props){
-    const version = props.version || 0
-    const property = props.property
-    const path = props.path || property
-    const context = useContext(BlockstackContext)
-    const { userSession, userData } = context
-    const content = property ? context[property] : null
-    const [stored, setStored] = props.local
-                              ? useStateWithLocalStorage(path)
-                              : useStateWithGaiaStorage(userSession, path)
-    useEffect(() => {
-      if (stored && !isEqual (content, stored)) {
-          console.info("PERSISTENT Set:", content, stored)
-          if (version != stored.version) {
-            // ## Fix: better handling of version including migration
-            console.error("Mismatching version in file", path, " - expected", version, "got", stored.version)
-          }
-          const entry = {}
-          entry[property] = stored.content
-          setContext(entry)
-    }}, [stored])
+  const {property, overwrite} = props
+  const version = props.version || 0
+  const path = props.path || property
+  const context = useContext(BlockstackContext)
+  const { userSession, userData } = context
+  const content = property ? context[property] : null
+  const [stored, setStored] = props.local
+                            ? useStateWithLocalStorage(path)
+                            : useStateWithGaiaStorage(userSession, path)
+  useEffect(() => {
+    // Load data from file
+    if (stored && !isEqual (content, stored)) {
+        console.info("PERSISTENT Set:", content, stored)
+        if (version != stored.version) {
+          // ## Fix: better handling of version including migration
+          console.error("Mismatching version in file", path, " - expected", version, "got", stored.version)
+        }
+        const entry = {}
+        entry[property] = stored.content
+        setContext(entry)
+  }}, [stored])
 
-    useEffect(() => {
-          if (!isEqual (content, stored && stored.content)) {
-            console.info("PERSISTENT save:", content, stored)
-            setStored({version: version, property: property, content: content})
-          } else {
-            console.log("PERSISTENT noop:", content, stored)
-          }
-        }, [content])
-    return ({stored: stored, })
+  useEffect(() => {
+      // Store content to file
+      if (!isEqual (content, stored && stored.content)) {
+        const replacement = overwrite ? content : merge({}, stored.content, content)
+        console.info("PERSISTENT save:", content, replacement)
+        setStored({version: version, property: property, content: replacement})
+      } else {
+        console.log("PERSISTENT noop:", content, stored)
+      }
+    }, [content])
+  return ({stored: stored, })
 }
 
 export function Persistent (props) {
   // perhaps should only bind value to context for its children?
   // ##FIX: validate input properties, particularly props.property
+  const {property, debug, overwrite} = props
   const result = usePersistent(props)
   const context = useContext(BlockstackContext)
-  const property = props.property
   const content = property ? context[property] : null
   return (
-    props.debug ?
+    debug ?
     <div>
       <h1>Persistent {property}</h1>
       <p>Stored: { JSON.stringify( stored ) }</p>
