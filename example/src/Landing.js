@@ -1,7 +1,7 @@
 import React from 'react';
 import { useBlockstack } from 'react-blockstack'
 
-export function Landing (props) {
+export default function Landing (props) {
   const { signIn } = useBlockstack()
   return (
     <div className="panel-landing" id="section-1">
