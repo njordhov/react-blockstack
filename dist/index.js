@@ -148,7 +148,7 @@ function useStateWithGaiaStorage(userSession, path) {
       value = _useState4[0],
       setValue = _useState4[1];
 
-  console.log("PERSISTENT ", path, " = ", value); // React roadmap is to support data loading with Suspense hook
+  console.log("PERSISTENT:", path, " = ", value); // React roadmap is to support data loading with Suspense hook
 
   if ((0, _lodash.isNil)(value)) {
     if (userSession.isUserSignedIn()) {
@@ -162,7 +162,7 @@ function useStateWithGaiaStorage(userSession, path) {
     } else {
       console.warn("PERSISTENT Get Fail: user not yet logged in");
     }
-  } // ##FIX: Saves initially loaded value (use updated React.Suspense hook when available)
+  } // ##FIX: Don't save initially loaded value (use updated React.Suspense hook when available)
 
 
   (0, _react.useEffect)(function () {
@@ -195,8 +195,8 @@ function usePersistent(props) {
 
   (0, _react.useEffect)(function () {
     // Load data from file
-    if (stored && !(0, _lodash.isEqual)(content, stored)) {
-      console.info("PERSISTENT Set:", content, stored);
+    if (!(0, _lodash.isNil)(stored) && !(0, _lodash.isEqual)(content, stored)) {
+      console.info("PERSISTENT Load:", content, stored);
 
       if (version != stored.version) {
         // ## Fix: better handling of version including migration
@@ -210,7 +210,7 @@ function usePersistent(props) {
   }, [stored]);
   (0, _react.useEffect)(function () {
     // Store content to file
-    if (!(0, _lodash.isEqual)(content, stored && stored.content)) {
+    if (!(0, _lodash.isUndefined)(content) && !(0, _lodash.isEqual)(content, stored && stored.content)) {
       var replacement = overwrite ? content : (0, _lodash.merge)({}, stored.content, content);
       console.info("PERSISTENT save:", content, replacement);
       setStored({
