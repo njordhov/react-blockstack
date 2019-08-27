@@ -1,7 +1,7 @@
 import React, { Component, createContext, useState, useEffect, useContext } from 'react'
 import { UserSession, AppConfig, Person } from 'blockstack';
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
-import { isNil, isEqual, isFunction, isUndefined, merge } from 'lodash'
+import { isNil, isEqual, isFunction, isUndefined, merge, set } from 'lodash'
 
 const defaultValue = {userData: null, signIn: null, signOut: null}
 
@@ -112,40 +112,49 @@ function useStateWithGaiaStorage (userSession, path) {
   return [value, setValue]
 }
 
-export function usePersistent (props){
-  const {property, overwrite} = props
+export function useStored (props){
+  const {property, overwrite, value, setValue} = props
   const version = props.version || 0
   const path = props.path || property
   const context = useContext(BlockstackContext)
   const { userSession, userData } = context
-  const content = property ? context[property] : null
   const [stored, setStored] = props.local
                             ? useStateWithLocalStorage(path)
                             : useStateWithGaiaStorage(userSession, path)
   useEffect(() => {
     // Load data from file
-    if (!isNil(stored) && !isEqual (content, stored)) {
-        console.info("PERSISTENT Load:", content, stored)
+    if (!isNil(stored) && !isEqual (value, stored)) {
+        console.info("PERSISTENT Load:", value, stored)
         if (version != stored.version) {
           // ## Fix: better handling of version including migration
           console.error("Mismatching version in file", path, " - expected", version, "got", stored.version)
         }
-        const entry = {}
-        entry[property] = stored.content
-        setContext(entry)
+        if (setValue) {
+          setValue(stored.content)
+        }
   }}, [stored])
 
   useEffect(() => {
       // Store content to file
-      if (!isUndefined(content) && !isEqual (content, stored && stored.content)) {
-        const replacement = overwrite ? content : merge({}, stored.content, content)
-        console.info("PERSISTENT save:", content, replacement)
+      if (!isUndefined(value) && !isEqual (value, stored && stored.content)) {
+        const replacement = overwrite ? value : merge({}, stored.content, value)
+        console.info("PERSISTENT save:", value, replacement)
         setStored({version: version, property: property, content: replacement})
       } else {
-        console.log("PERSISTENT noop:", content, stored)
+        console.log("PERSISTENT noop:", value, stored)
       }
-    }, [content])
-  return ({stored: stored, })
+    }, [value])
+  return ( stored )
+}
+
+export function usePersistent (props){
+  // Make context state persistent
+  const {property, overwrite} = props
+  const context = useContext(BlockstackContext)
+  const value = property ? context[property] : null
+  const setValue = property ? (value) => setContext( set({}, property, value )) : null
+  const stored = useStored (merge ({}, props, {value: value, setValue: setValue}))
+  return( stored )
 }
 
 export function Persistent (props) {

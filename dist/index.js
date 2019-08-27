@@ -7,6 +7,7 @@ exports.useBlockstack = useBlockstack;
 exports.setContext = setContext;
 exports.initBlockstack = initBlockstack;
 exports.Blockstack = Blockstack;
+exports.useStored = useStored;
 exports.usePersistent = usePersistent;
 exports.Persistent = Persistent;
 exports.useAppManifest = useAppManifest;
@@ -178,15 +179,16 @@ function useStateWithGaiaStorage(userSession, path) {
   return [value, setValue];
 }
 
-function usePersistent(props) {
+function useStored(props) {
   var property = props.property,
-      overwrite = props.overwrite;
+      overwrite = props.overwrite,
+      value = props.value,
+      setValue = props.setValue;
   var version = props.version || 0;
   var path = props.path || property;
   var context = (0, _react.useContext)(BlockstackContext);
   var userSession = context.userSession,
       userData = context.userData;
-  var content = property ? context[property] : null;
 
   var _ref = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(userSession, path),
       _ref2 = _slicedToArray(_ref, 2),
@@ -195,36 +197,50 @@ function usePersistent(props) {
 
   (0, _react.useEffect)(function () {
     // Load data from file
-    if (!(0, _lodash.isNil)(stored) && !(0, _lodash.isEqual)(content, stored)) {
-      console.info("PERSISTENT Load:", content, stored);
+    if (!(0, _lodash.isNil)(stored) && !(0, _lodash.isEqual)(value, stored)) {
+      console.info("PERSISTENT Load:", value, stored);
 
       if (version != stored.version) {
         // ## Fix: better handling of version including migration
         console.error("Mismatching version in file", path, " - expected", version, "got", stored.version);
       }
 
-      var entry = {};
-      entry[property] = stored.content;
-      setContext(entry);
+      if (setValue) {
+        setValue(stored.content);
+      }
     }
   }, [stored]);
   (0, _react.useEffect)(function () {
     // Store content to file
-    if (!(0, _lodash.isUndefined)(content) && !(0, _lodash.isEqual)(content, stored && stored.content)) {
-      var replacement = overwrite ? content : (0, _lodash.merge)({}, stored.content, content);
-      console.info("PERSISTENT save:", content, replacement);
+    if (!(0, _lodash.isUndefined)(value) && !(0, _lodash.isEqual)(value, stored && stored.content)) {
+      var replacement = overwrite ? value : (0, _lodash.merge)({}, stored.content, value);
+      console.info("PERSISTENT save:", value, replacement);
       setStored({
         version: version,
         property: property,
         content: replacement
       });
     } else {
-      console.log("PERSISTENT noop:", content, stored);
+      console.log("PERSISTENT noop:", value, stored);
     }
-  }, [content]);
-  return {
-    stored: stored
-  };
+  }, [value]);
+  return stored;
+}
+
+function usePersistent(props) {
+  // Make context state persistent
+  var property = props.property,
+      overwrite = props.overwrite;
+  var context = (0, _react.useContext)(BlockstackContext);
+  var value = property ? context[property] : null;
+  var setValue = property ? function (value) {
+    return setContext((0, _lodash.set)({}, property, value));
+  } : null;
+  var stored = useStored((0, _lodash.merge)({}, props, {
+    value: value,
+    setValue: setValue
+  }));
+  return stored;
 }
 
 function Persistent(props) {
