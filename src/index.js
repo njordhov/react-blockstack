@@ -1,7 +1,7 @@
 import React, { Component, createContext, useState, useEffect, useContext } from 'react'
 import { UserSession, AppConfig, Person } from 'blockstack';
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
-import { isNil, isEqual, isFunction, merge } from 'lodash'
+import { isNil, isEqual, isFunction, isUndefined, merge } from 'lodash'
 
 const defaultValue = {userData: null, signIn: null, signOut: null}
 
@@ -83,7 +83,7 @@ function useStateWithLocalStorage (storageKey) {
 
 function useStateWithGaiaStorage (userSession, path) {
   const [value, setValue] = useState(null)
-  console.log("PERSISTENT ", path, " = ", value)
+  console.log("PERSISTENT:", path, " = ", value)
   // React roadmap is to support data loading with Suspense hook
   if ( isNil(value) ) {
     if (userSession.isUserSignedIn()) {
@@ -99,7 +99,7 @@ function useStateWithGaiaStorage (userSession, path) {
       } else {
         console.warn("PERSISTENT Get Fail: user not yet logged in")
     }}
-  // ##FIX: Saves initially loaded value (use updated React.Suspense hook when available)
+  // ##FIX: Don't save initially loaded value (use updated React.Suspense hook when available)
   useEffect(() => {
     if ( !isNil(value) ) {
          if (!userSession.isUserSignedIn()) {
@@ -124,8 +124,8 @@ export function usePersistent (props){
                             : useStateWithGaiaStorage(userSession, path)
   useEffect(() => {
     // Load data from file
-    if (stored && !isEqual (content, stored)) {
-        console.info("PERSISTENT Set:", content, stored)
+    if (!isNil(stored) && !isEqual (content, stored)) {
+        console.info("PERSISTENT Load:", content, stored)
         if (version != stored.version) {
           // ## Fix: better handling of version including migration
           console.error("Mismatching version in file", path, " - expected", version, "got", stored.version)
@@ -137,7 +137,7 @@ export function usePersistent (props){
 
   useEffect(() => {
       // Store content to file
-      if (!isEqual (content, stored && stored.content)) {
+      if (!isUndefined(content) && !isEqual (content, stored && stored.content)) {
         const replacement = overwrite ? content : merge({}, stored.content, content)
         console.info("PERSISTENT save:", content, replacement)
         setStored({version: version, property: property, content: replacement})

@@ -62,7 +62,7 @@ To include the button in jsx:
 
 ## React Class Components
 
-React hooks like `useBlockstack` can only be used inside function components.
+React hooks like `useBlockstack` is used inside function components.
 For conventional React class components, enclose elements in a shared Blockstack context:
 
     ReactDOM.render(<Blockstack><App /></Blockstack>,
