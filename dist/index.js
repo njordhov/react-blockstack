@@ -269,7 +269,9 @@ function getAppManifestAtom(appUri) {
   var atom = _reactAtom.Atom.of(null);
 
   var setValue = function setValue(value) {
-    return (0, _reactAtom.swap)(atom, value);
+    return (0, _reactAtom.swap)(atom, function (state) {
+      return value;
+    });
   };
 
   try {

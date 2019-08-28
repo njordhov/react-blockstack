@@ -182,7 +182,7 @@ export function Persistent (props) {
 
 export function getAppManifestAtom (appUri) {
     const atom = Atom.of(null)
-    const setValue = (value) => swap(atom, value)
+    const setValue = (value) => swap(atom, state => value)
     try {
         const manifestUri = appUri + "/manifest.json"
         const controller = new AbortController()
