@@ -1,6 +1,6 @@
 var path = require('path');
 module.exports = {
-  entry: './src/index.js',
+  entry: ['./src/index.js', './src/context.js'],
   target: 'web',
   output: {
     path: path.resolve(__dirname, 'build'),
