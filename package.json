@@ -1,6 +1,6 @@
 {
   "name": "react-blockstack",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "React context for the Blockstack SDK",
   "main": "dist/index.js",
   "repository": {
