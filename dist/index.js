@@ -61,7 +61,7 @@ function signIn(e) {
     signIn: null
   };
   setContext(update);
-  userSession.redirectToSignIn();
+  userSession.redirectToSignIn(window.location.pathname);
 }
 
 function signOut(e) {
@@ -180,13 +180,15 @@ function useStateWithGaiaStorage(userSession, path) {
 }
 
 function useStored(props) {
+  // Generalized persistent property storage
   var property = props.property,
       overwrite = props.overwrite,
       value = props.value,
       setValue = props.setValue;
   var version = props.version || 0;
   var path = props.path || property;
-  var context = (0, _react.useContext)(BlockstackContext);
+  var context = (0, _react.useContext)(BlockstackContext); // ## FIX: call useBlockstack() instead??
+
   var userSession = context.userSession,
       userData = context.userData;
 
@@ -205,15 +207,18 @@ function useStored(props) {
         console.error("Mismatching version in file", path, " - expected", version, "got", stored.version);
       }
 
-      if (setValue) {
+      if ((0, _lodash.isFunction)(setValue)) {
         setValue(stored.content);
+      } else {
+        console.warn("Missing setValue property for storing:", property);
       }
     }
   }, [stored]);
   (0, _react.useEffect)(function () {
     // Store content to file
     if (!(0, _lodash.isUndefined)(value) && !(0, _lodash.isEqual)(value, stored && stored.content)) {
-      var replacement = overwrite ? value : (0, _lodash.merge)({}, stored.content, value);
+      var content = stored && stored.content;
+      var replacement = overwrite ? value : (0, _lodash.merge)({}, content, value);
       console.info("PERSISTENT save:", value, replacement);
       setStored({
         version: version,
@@ -231,7 +236,8 @@ function usePersistent(props) {
   // Make context state persistent
   var property = props.property,
       overwrite = props.overwrite;
-  var context = (0, _react.useContext)(BlockstackContext);
+  var context = (0, _react.useContext)(BlockstackContext); // ## FIX: call useBlockstack() instead??
+
   var value = property ? context[property] : null;
   var setValue = property ? function (value) {
     return setContext((0, _lodash.set)({}, property, value));
@@ -250,7 +256,8 @@ function Persistent(props) {
       debug = props.debug,
       overwrite = props.overwrite;
   var result = usePersistent(props);
-  var context = (0, _react.useContext)(BlockstackContext);
+  var context = (0, _react.useContext)(BlockstackContext); // ## FIX: call useBlockstack() instead??
+
   var content = property ? context[property] : null;
   return debug ? _react["default"].createElement("div", null, _react["default"].createElement("h1", null, "Persistent ", property), _react["default"].createElement("p", null, "Stored: ", JSON.stringify(stored)), _react["default"].createElement("p", null, "Context: ", JSON.stringify(content))) : null;
 }

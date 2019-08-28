@@ -20,7 +20,7 @@ function signIn(e) {
   const { userSession } = deref(contextAtom)
   const update = {signIn: null}
   setContext( update )
-  userSession.redirectToSignIn();
+  userSession.redirectToSignIn(window.location.pathname);
 }
 
 function signOut(e) {
@@ -112,11 +112,12 @@ function useStateWithGaiaStorage (userSession, path) {
   return [value, setValue]
 }
 
-export function useStored (props){
+export function useStored (props) {
+  // Generalized persistent property storage
   const {property, overwrite, value, setValue} = props
   const version = props.version || 0
   const path = props.path || property
-  const context = useContext(BlockstackContext)
+  const context = useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
   const { userSession, userData } = context
   const [stored, setStored] = props.local
                             ? useStateWithLocalStorage(path)
@@ -129,15 +130,18 @@ export function useStored (props){
           // ## Fix: better handling of version including migration
           console.error("Mismatching version in file", path, " - expected", version, "got", stored.version)
         }
-        if (setValue) {
+        if (isFunction(setValue)) {
           setValue(stored.content)
+        } else {
+          console.warn("Missing setValue property for storing:", property)
         }
   }}, [stored])
 
   useEffect(() => {
       // Store content to file
       if (!isUndefined(value) && !isEqual (value, stored && stored.content)) {
-        const replacement = overwrite ? value : merge({}, stored.content, value)
+        const content = stored && stored.content
+        const replacement = overwrite ? value : merge({}, content, value)
         console.info("PERSISTENT save:", value, replacement)
         setStored({version: version, property: property, content: replacement})
       } else {
@@ -150,7 +154,7 @@ export function useStored (props){
 export function usePersistent (props){
   // Make context state persistent
   const {property, overwrite} = props
-  const context = useContext(BlockstackContext)
+  const context = useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
   const value = property ? context[property] : null
   const setValue = property ? (value) => setContext( set({}, property, value )) : null
   const stored = useStored (merge ({}, props, {value: value, setValue: setValue}))
@@ -162,7 +166,7 @@ export function Persistent (props) {
   // ##FIX: validate input properties, particularly props.property
   const {property, debug, overwrite} = props
   const result = usePersistent(props)
-  const context = useContext(BlockstackContext)
+  const context = useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
   const content = property ? context[property] : null
   return (
     debug ?
