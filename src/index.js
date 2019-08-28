@@ -20,7 +20,7 @@ function signIn(e) {
   const { userSession } = deref(contextAtom)
   const update = {signIn: null}
   setContext( update )
-  userSession.redirectToSignIn(window.location.pathname);
+  userSession.redirectToSignIn() // window.location.pathname
 }
 
 function signOut(e) {
@@ -34,7 +34,7 @@ function signOut(e) {
 }
 
 function handleAuthenticated (userData) {
-  window.history.replaceState({}, document.title, "/")
+  window.history.replaceState({}, document.title, window.location.pathname)
   const update = { userData: userData,
                    person: new Person(userData.profile),
                    signIn: null,
