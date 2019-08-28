@@ -10,6 +10,7 @@ exports.Blockstack = Blockstack;
 exports.useStored = useStored;
 exports.usePersistent = usePersistent;
 exports.Persistent = Persistent;
+exports.getAppManifestAtom = getAppManifestAtom;
 exports.useAppManifest = useAppManifest;
 exports.AuthenticatedDocumentClass = AuthenticatedDocumentClass;
 exports["default"] = exports.BlockstackContext = void 0;
@@ -264,6 +265,39 @@ function Persistent(props) {
 /* External Dapps */
 
 
+function getAppManifestAtom(appUri) {
+  var atom = _reactAtom.Atom.of(null);
+
+  var setValue = function setValue(value) {
+    return (0, _reactAtom.swap)(atom, value);
+  };
+
+  try {
+    var manifestUri = appUri + "/manifest.json";
+    var controller = new AbortController();
+
+    var cleanup = function cleanup() {
+      return controller.abort();
+    };
+
+    console.info("FETCHING:", manifestUri);
+    fetch(manifestUri, {
+      signal: controller.signal
+    }).then(function (response) {
+      response.json().then(setValue);
+    })["catch"](function (err) {
+      console.warn("Failed to get manifest for:", appUri, err);
+    }); // .finally (() => setValue({}))
+  } catch (err) {
+    console.warn("Failed fetching when mounting:", err);
+    setValue({
+      error: err
+    });
+  }
+
+  return atom;
+}
+
 function useAppManifest(appUri) {
   // null when pending
   var _useState5 = (0, _react.useState)(null),
@@ -289,9 +323,6 @@ function useAppManifest(appUri) {
         response.json().then(setValue);
       })["catch"](function (err) {
         console.warn("Failed to get manifest for:", appUri, err);
-        setValue({
-          error: err
-        });
       }); // .finally (() => setValue({}))
 
       return cleanup;

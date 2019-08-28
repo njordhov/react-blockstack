@@ -180,6 +180,25 @@ export function Persistent (props) {
 
 /* External Dapps */
 
+export function getAppManifestAtom (appUri) {
+    const atom = Atom.of(null)
+    const setValue = (value) => swap(atom, value)
+    try {
+        const manifestUri = appUri + "/manifest.json"
+        const controller = new AbortController()
+        const cleanup = () => controller.abort()
+        console.info("FETCHING:", manifestUri)
+        fetch(manifestUri, {signal: controller.signal})
+        .then ( response => {response.json().then( setValue )})
+        .catch ( err => {console.warn("Failed to get manifest for:", appUri, err)})
+        // .finally (() => setValue({}))
+      } catch (err) {
+        console.warn("Failed fetching when mounting:", err)
+        setValue({error: err})
+      }
+    return (atom)
+  }
+
 export function useAppManifest (appUri) {
     // null when pending
     const [value, setValue] = useState(null)
@@ -192,8 +211,7 @@ export function useAppManifest (appUri) {
         console.info("FETCHING:", manifestUri)
         fetch(manifestUri, {signal: controller.signal})
         .then ( response => {response.json().then( setValue )})
-        .catch ( err => {console.warn("Failed to get manifest for:", appUri, err)
-                         setValue({error: err})})
+        .catch ( err => {console.warn("Failed to get manifest for:", appUri, err)})
         // .finally (() => setValue({}))
         return (cleanup)
       } catch (err) {
