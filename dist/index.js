@@ -188,10 +188,10 @@ function useStored(props) {
       setValue = props.setValue;
   var version = props.version || 0;
   var path = props.path || property;
-  var context = (0, _react.useContext)(BlockstackContext); // ## FIX: call useBlockstack() instead??
+  var context = useBlockstack(); // useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
 
   var userSession = context.userSession,
-      userData = context.userData;
+      userData = context.userData; // move into effect?
 
   var _ref = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(userSession, path),
       _ref2 = _slicedToArray(_ref, 2),
@@ -237,7 +237,7 @@ function usePersistent(props) {
   // Make context state persistent
   var property = props.property,
       overwrite = props.overwrite;
-  var context = (0, _react.useContext)(BlockstackContext); // ## FIX: call useBlockstack() instead??
+  var context = useBlockstack(); // useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
 
   var value = property ? context[property] : null;
   var setValue = property ? function (value) {
@@ -257,7 +257,7 @@ function Persistent(props) {
       debug = props.debug,
       overwrite = props.overwrite;
   var result = usePersistent(props);
-  var context = (0, _react.useContext)(BlockstackContext); // ## FIX: call useBlockstack() instead??
+  var context = useBlockstack(); // useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
 
   var content = property ? context[property] : null;
   return debug ? _react["default"].createElement("div", null, _react["default"].createElement("h1", null, "Persistent ", property), _react["default"].createElement("p", null, "Stored: ", JSON.stringify(stored)), _react["default"].createElement("p", null, "Context: ", JSON.stringify(content))) : null;
