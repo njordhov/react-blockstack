@@ -117,8 +117,9 @@ export function useStored (props) {
   const {property, overwrite, value, setValue} = props
   const version = props.version || 0
   const path = props.path || property
-  const context = useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
+  const context = useBlockstack() // useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
   const { userSession, userData } = context
+  // move into effect?
   const [stored, setStored] = props.local
                             ? useStateWithLocalStorage(path)
                             : useStateWithGaiaStorage(userSession, path)
@@ -154,7 +155,7 @@ export function useStored (props) {
 export function usePersistent (props){
   // Make context state persistent
   const {property, overwrite} = props
-  const context = useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
+  const context = useBlockstack() // useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
   const value = property ? context[property] : null
   const setValue = property ? (value) => setContext( set({}, property, value )) : null
   const stored = useStored (merge ({}, props, {value: value, setValue: setValue}))
@@ -166,7 +167,7 @@ export function Persistent (props) {
   // ##FIX: validate input properties, particularly props.property
   const {property, debug, overwrite} = props
   const result = usePersistent(props)
-  const context = useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
+  const context = useBlockstack() // useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
   const content = property ? context[property] : null
   return (
     debug ?
