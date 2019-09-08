@@ -81,31 +81,39 @@ function useStateWithLocalStorage (storageKey) {
   return [value, setValue];
 }
 
-function useStateWithGaiaStorage (userSession, path) {
+function useStateWithGaiaStorage (path) {
+  // Low level gaia file hook
+  // Note: Does not guard against multiple hooks for the same file
   const [value, setValue] = useState(null)
   console.log("PERSISTENT:", path, " = ", value)
+  const { userSession, userData } = useBlockstack()
+  const isUserSignedIn = !!userData
   // React roadmap is to support data loading with Suspense hook
-  if ( isNil(value) ) {
-    if (userSession.isUserSignedIn()) {
-        userSession.getFile(path)
-        .then(stored => {
-             console.info("PERSISTENT Get:", path, value, stored)
-             const content = !isNil(stored) ? JSON.parse(stored) : {}
-             setValue(content)
-            })
-         .catch(err => {
-           console.error("PERSISTENT Get Error:", err)
-         })
-      } else {
-        console.warn("PERSISTENT Get Fail: user not yet logged in")
-    }}
+  useEffect (() => {
+    if ( isNil(value) ) {
+      if (isUserSignedIn && path) {
+          userSession.getFile(path)
+          .then(stored => {
+               console.info("[PERSISTENT Get]", path, value, stored)
+               const content = !isNil(stored) ? JSON.parse(stored) : {}
+               setValue(content)
+              })
+           .catch(err => {
+             console.error("[PERSISTENT Get] Error:", err)
+           })
+        } else if (path) {
+          console.info("[PERSISTENT Get] Waiting for user to sign on before loading:", path)
+        } else {
+          console.warn("[PERSISTENT Get] No file path")
+        }
+      }}, [userSession, isUserSignedIn, path])
   // ##FIX: Don't save initially loaded value (use updated React.Suspense hook when available)
   useEffect(() => {
     if ( !isNil(value) ) {
-         if (!userSession.isUserSignedIn()) {
-           console.warn("PERSISTENT Put Fail: user no longer logged in")
+         if (!isUserSignedIn) {
+           console.warn("[Put File]: user no longer logged in")
          } else {
-           console.info("PERSISTENT Put:", path, JSON.stringify(value))
+           console.info("[Put File]:", path, JSON.stringify(value))
            userSession.putFile(path, JSON.stringify(value))
          }
     }},[value])
@@ -117,12 +125,11 @@ export function useStored (props) {
   const {property, overwrite, value, setValue} = props
   const version = props.version || 0
   const path = props.path || property
-  const context = useBlockstack() // useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
+  const context = useBlockstack()
   const { userSession, userData } = context
-  // move into effect?
   const [stored, setStored] = props.local
                             ? useStateWithLocalStorage(path)
-                            : useStateWithGaiaStorage(userSession, path)
+                            : useStateWithGaiaStorage(path)
   useEffect(() => {
     // Load data from file
     if (!isNil(stored) && !isEqual (value, stored)) {
@@ -182,6 +189,7 @@ export function Persistent (props) {
 /* External Dapps */
 
 export function getAppManifestAtom (appUri) {
+  // Out: Atom containing either an app manifest or a null value. 
     const atom = Atom.of(null)
     const setValue = (value) => swap(atom, state => value)
     try {

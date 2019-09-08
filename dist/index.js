@@ -144,28 +144,37 @@ function useStateWithLocalStorage(storageKey) {
   return [value, setValue];
 }
 
-function useStateWithGaiaStorage(userSession, path) {
+function useStateWithGaiaStorage(path) {
+  // Low level gaia file hook - does not guard against multiple instances for the same file
   var _useState3 = (0, _react.useState)(null),
       _useState4 = _slicedToArray(_useState3, 2),
       value = _useState4[0],
       setValue = _useState4[1];
 
-  console.log("PERSISTENT:", path, " = ", value); // React roadmap is to support data loading with Suspense hook
+  console.log("PERSISTENT:", path, " = ", value);
 
-  if ((0, _lodash.isNil)(value)) {
-    if (userSession.isUserSignedIn()) {
-      userSession.getFile(path).then(function (stored) {
-        console.info("PERSISTENT Get:", path, value, stored);
-        var content = !(0, _lodash.isNil)(stored) ? JSON.parse(stored) : {};
-        setValue(content);
-      })["catch"](function (err) {
-        console.error("PERSISTENT Get Error:", err);
-      });
-    } else {
-      console.warn("PERSISTENT Get Fail: user not yet logged in");
+  var _useBlockstack = useBlockstack(),
+      userSession = _useBlockstack.userSession,
+      userData = _useBlockstack.userData; // React roadmap is to support data loading with Suspense hook
+
+
+  (0, _react.useEffect)(function () {
+    if ((0, _lodash.isNil)(value)) {
+      if (userData && path) {
+        userSession.getFile(path).then(function (stored) {
+          console.info("[PERSISTENT Get]", path, value, stored);
+          var content = !(0, _lodash.isNil)(stored) ? JSON.parse(stored) : {};
+          setValue(content);
+        })["catch"](function (err) {
+          console.error("[PERSISTENT Get] Error:", err);
+        });
+      } else if (path) {
+        console.info("[PERSISTENT Get] Waiting for user to sign on before loading:", path);
+      } else {
+        console.warn("[PERSISTENT Get] No file path");
+      }
     }
-  } // ##FIX: Don't save initially loaded value (use updated React.Suspense hook when available)
-
+  }, [userSession, userData, path]); // ##FIX: Don't save initially loaded value (use updated React.Suspense hook when available)
 
   (0, _react.useEffect)(function () {
     if (!(0, _lodash.isNil)(value)) {
@@ -188,12 +197,11 @@ function useStored(props) {
       setValue = props.setValue;
   var version = props.version || 0;
   var path = props.path || property;
-  var context = useBlockstack(); // useContext(BlockstackContext) // ## FIX: call useBlockstack() instead??
-
+  var context = useBlockstack();
   var userSession = context.userSession,
-      userData = context.userData; // move into effect?
+      userData = context.userData;
 
-  var _ref = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(userSession, path),
+  var _ref = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(path),
       _ref2 = _slicedToArray(_ref, 2),
       stored = _ref2[0],
       setStored = _ref2[1];
@@ -344,8 +352,8 @@ function AuthenticatedDocumentClass(props) {
   // declare a classname decorating the document element when authenticated
   var className = props.name;
 
-  var _useBlockstack = useBlockstack(),
-      userData = _useBlockstack.userData;
+  var _useBlockstack2 = useBlockstack(),
+      userData = _useBlockstack2.userData;
 
   (0, _react.useEffect)(function () {
     console.log("Updating documentElement classes to reflect signed in status:", !!userData);
