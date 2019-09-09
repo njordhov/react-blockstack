@@ -84,8 +84,10 @@ function useStateWithLocalStorage (storageKey) {
 function useStateWithGaiaStorage (path) {
   // Low level gaia file hook
   // Note: Does not guard against multiple hooks for the same file
+  // Possbly an issue that change is set then value, could introduce inconsisitent state
   const [value, setValue] = useState(null)
-  console.log("PERSISTENT:", path, " = ", value)
+  const [change, setChange] = useState(null)
+  console.log("[File]:", path, " = ", value)
   const { userSession, userData } = useBlockstack()
   const isUserSignedIn = !!userData
   // React roadmap is to support data loading with Suspense hook
@@ -94,30 +96,38 @@ function useStateWithGaiaStorage (path) {
       if (isUserSignedIn && path) {
           userSession.getFile(path)
           .then(stored => {
-               console.info("[PERSISTENT Get]", path, value, stored)
+               console.info("[Get File]", path, value, stored)
                const content = !isNil(stored) ? JSON.parse(stored) : {}
                setValue(content)
               })
            .catch(err => {
-             console.error("[PERSISTENT Get] Error:", err)
+             console.error("[Get File] Error:", err)
            })
         } else if (path) {
-          console.info("[PERSISTENT Get] Waiting for user to sign on before loading:", path)
+          console.info("[Get File] Waiting for user to sign on before loading:", path)
         } else {
-          console.warn("[PERSISTENT Get] No file path")
+          console.warn("[Get File] No file path")
         }
       }}, [userSession, isUserSignedIn, path])
-  // ##FIX: Don't save initially loaded value (use updated React.Suspense hook when available)
   useEffect(() => {
-    if ( !isNil(value) ) {
+    if ( !isNil(change) ) {
          if (!isUserSignedIn) {
-           console.warn("[Put File]: user no longer logged in")
-         } else {
-           console.info("[Put File]:", path, JSON.stringify(value))
-           userSession.putFile(path, JSON.stringify(value))
+           console.warn("[Put File] User not logged in")
+         } else if (!isEqual(change, value)){ // test should be redundant
+           const content = JSON.stringify(change)
+           const original = value
+           setValue(change) // Cannot delay until saved as it will cause inconsistent state
+           userSession.putFile(path, content)
+           .then(() => console.info("[Put File] ", path, content))
+           .catch((err) => {
+               // Don't revert on error for now as it impairs UX
+               // setValue(original)
+               console.warn("[Put File] ", path, err)
+             })
          }
-    }},[value])
-  return [value, setValue]
+    }},[change, userSession])
+  // FIX: deliver eventual error as third value?
+  return [value, setChange]
 }
 
 export function useStored (props) {
@@ -125,8 +135,6 @@ export function useStored (props) {
   const {property, overwrite, value, setValue} = props
   const version = props.version || 0
   const path = props.path || property
-  const context = useBlockstack()
-  const { userSession, userData } = context
   const [stored, setStored] = props.local
                             ? useStateWithLocalStorage(path)
                             : useStateWithGaiaStorage(path)
@@ -188,25 +196,31 @@ export function Persistent (props) {
 
 /* External Dapps */
 
-export function getAppManifestAtom (appUri) {
-  // Out: Atom containing either an app manifest or a null value. 
-    const atom = Atom.of(null)
-    const setValue = (value) => swap(atom, state => value)
-    try {
-        const manifestUri = appUri + "/manifest.json"
-        const controller = new AbortController()
-        const cleanup = () => controller.abort()
-        console.info("FETCHING:", manifestUri)
-        fetch(manifestUri, {signal: controller.signal})
-        .then ( response => {response.json().then( setValue )})
-        .catch ( err => {console.warn("Failed to get manifest for:", appUri, err)})
-        // .finally (() => setValue({}))
-      } catch (err) {
-        console.warn("Failed fetching when mounting:", err)
-        setValue({error: err})
-      }
-    return (atom)
-  }
+function getAppManifestAtom (appUri) {
+  // Out: Atom promise containing a either an app manifest or a null value.
+  // Avoid passing outside this module to avoid conflicts if there are multiple react-atom packages in the project
+  const atom = Atom.of(null)
+  const setValue = (value) => swap(atom, state => value)
+  try {
+      const manifestUri = appUri + "/manifest.json"
+      const controller = new AbortController()
+      const cleanup = () => controller.abort()
+      console.info("FETCHING:", manifestUri)
+      fetch(manifestUri, {signal: controller.signal})
+      .then ( response => {response.json().then( setValue )})
+      .catch ( err => {console.warn("Failed to get manifest for:", appUri, err)})
+      // .finally (() => setValue({}))
+    } catch (err) {
+      console.warn("Failed fetching when mounting:", err)
+      setValue({error: err})
+    }
+  return (atom)
+}
+
+export function createAppManifestHook (appUri) {
+  const atom = getAppManifestAtom(appUri)
+  return( () => useAtom(atom) )
+}
 
 export function useAppManifest (appUri) {
     // null when pending

@@ -10,7 +10,7 @@ exports.Blockstack = Blockstack;
 exports.useStored = useStored;
 exports.usePersistent = usePersistent;
 exports.Persistent = Persistent;
-exports.getAppManifestAtom = getAppManifestAtom;
+exports.createAppManifestHook = createAppManifestHook;
 exports.useAppManifest = useAppManifest;
 exports.AuthenticatedDocumentClass = AuthenticatedDocumentClass;
 exports["default"] = exports.BlockstackContext = void 0;
@@ -145,48 +145,64 @@ function useStateWithLocalStorage(storageKey) {
 }
 
 function useStateWithGaiaStorage(path) {
-  // Low level gaia file hook - does not guard against multiple instances for the same file
+  // Low level gaia file hook
+  // Note: Does not guard against multiple hooks for the same file
   var _useState3 = (0, _react.useState)(null),
       _useState4 = _slicedToArray(_useState3, 2),
       value = _useState4[0],
       setValue = _useState4[1];
 
-  console.log("PERSISTENT:", path, " = ", value);
+  var _useState5 = (0, _react.useState)(null),
+      _useState6 = _slicedToArray(_useState5, 2),
+      change = _useState6[0],
+      setChange = _useState6[1];
+
+  console.log("[File]:", path, " = ", value);
 
   var _useBlockstack = useBlockstack(),
       userSession = _useBlockstack.userSession,
-      userData = _useBlockstack.userData; // React roadmap is to support data loading with Suspense hook
+      userData = _useBlockstack.userData;
 
+  var isUserSignedIn = !!userData; // React roadmap is to support data loading with Suspense hook
 
   (0, _react.useEffect)(function () {
     if ((0, _lodash.isNil)(value)) {
-      if (userData && path) {
+      if (isUserSignedIn && path) {
         userSession.getFile(path).then(function (stored) {
-          console.info("[PERSISTENT Get]", path, value, stored);
+          console.info("[Get File]", path, value, stored);
           var content = !(0, _lodash.isNil)(stored) ? JSON.parse(stored) : {};
           setValue(content);
         })["catch"](function (err) {
-          console.error("[PERSISTENT Get] Error:", err);
+          console.error("[Get File] Error:", err);
         });
       } else if (path) {
-        console.info("[PERSISTENT Get] Waiting for user to sign on before loading:", path);
+        console.info("[Get File] Waiting for user to sign on before loading:", path);
       } else {
-        console.warn("[PERSISTENT Get] No file path");
+        console.warn("[Get File] No file path");
       }
     }
-  }, [userSession, userData, path]); // ##FIX: Don't save initially loaded value (use updated React.Suspense hook when available)
-
+  }, [userSession, isUserSignedIn, path]);
   (0, _react.useEffect)(function () {
-    if (!(0, _lodash.isNil)(value)) {
-      if (!userSession.isUserSignedIn()) {
-        console.warn("PERSISTENT Put Fail: user no longer logged in");
-      } else {
-        console.info("PERSISTENT Put:", path, JSON.stringify(value));
-        userSession.putFile(path, JSON.stringify(value));
+    if (!(0, _lodash.isNil)(change)) {
+      if (!isUserSignedIn) {
+        console.warn("[Put File] User not logged in");
+      } else if (!(0, _lodash.isEqual)(change, value)) {
+        // test should be redundant
+        var content = JSON.stringify(change);
+        var original = value;
+        setValue(change); // Cannot delay until saved as it will cause inconsistent state
+
+        userSession.putFile(path, content).then(function () {
+          return console.info("[Put File] ", path, content);
+        })["catch"](function (err) {
+          setValue(original);
+          console.warn("[Put File] ", path, err);
+        });
       }
     }
-  }, [value]);
-  return [value, setValue];
+  }, [change, userSession]); // FIX: deliver eventual error as third value?
+
+  return [value, setChange];
 }
 
 function useStored(props) {
@@ -197,9 +213,6 @@ function useStored(props) {
       setValue = props.setValue;
   var version = props.version || 0;
   var path = props.path || property;
-  var context = useBlockstack();
-  var userSession = context.userSession,
-      userData = context.userData;
 
   var _ref = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(path),
       _ref2 = _slicedToArray(_ref, 2),
@@ -274,6 +287,8 @@ function Persistent(props) {
 
 
 function getAppManifestAtom(appUri) {
+  // Out: Atom promise containing a either an app manifest or a null value.
+  // Avoid passing outside this module to avoid conflicts if there are multiple react-atom packages in the project
   var atom = _reactAtom.Atom.of(null);
 
   var setValue = function setValue(value) {
@@ -308,12 +323,19 @@ function getAppManifestAtom(appUri) {
   return atom;
 }
 
+function createAppManifestHook(appUri) {
+  var atom = getAppManifestAtom(appUri);
+  return function () {
+    return (0, _reactAtom.useAtom)(atom);
+  };
+}
+
 function useAppManifest(appUri) {
   // null when pending
-  var _useState5 = (0, _react.useState)(null),
-      _useState6 = _slicedToArray(_useState5, 2),
-      value = _useState6[0],
-      setValue = _useState6[1]; // ## FIX bug: May start another request while pending for a response
+  var _useState7 = (0, _react.useState)(null),
+      _useState8 = _slicedToArray(_useState7, 2),
+      value = _useState8[0],
+      setValue = _useState8[1]; // ## FIX bug: May start another request while pending for a response
 
 
   (0, _react.useEffect)(function () {
