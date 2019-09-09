@@ -147,6 +147,7 @@ function useStateWithLocalStorage(storageKey) {
 function useStateWithGaiaStorage(path) {
   // Low level gaia file hook
   // Note: Does not guard against multiple hooks for the same file
+  // Possbly an issue that change is set then value, could introduce inconsisitent state
   var _useState3 = (0, _react.useState)(null),
       _useState4 = _slicedToArray(_useState3, 2),
       value = _useState4[0],
@@ -195,7 +196,8 @@ function useStateWithGaiaStorage(path) {
         userSession.putFile(path, content).then(function () {
           return console.info("[Put File] ", path, content);
         })["catch"](function (err) {
-          setValue(original);
+          // Don't revert on error for now as it impairs UX
+          // setValue(original)
           console.warn("[Put File] ", path, err);
         });
       }
