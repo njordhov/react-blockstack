@@ -13,6 +13,7 @@ exports.Persistent = Persistent;
 exports.createAppManifestHook = createAppManifestHook;
 exports.useAppManifest = useAppManifest;
 exports.AuthenticatedDocumentClass = AuthenticatedDocumentClass;
+exports.useProfile = useProfile;
 exports["default"] = exports.BlockstackContext = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
@@ -393,4 +394,23 @@ function AuthenticatedDocumentClass(props) {
 }
 
 var _default = BlockstackContext;
+/* User Profiles ================================ */
+
 exports["default"] = _default;
+
+function useProfile(username, zoneFileLookupURL) {
+  var _useState9 = (0, _react.useState)(null),
+      _useState10 = _slicedToArray(_useState9, 2),
+      value = _useState10[0],
+      setValue = _useState10[1];
+
+  var _useBlockstack3 = useBlockstack(),
+      userSession = _useBlockstack3.userSession;
+
+  (0, _react.useEffect)(function () {
+    if (userSession) {
+      (0, _blockstack.lookupProfile)(username, zoneFileLookupURL).then(setValue);
+    }
+  });
+  return value;
+}

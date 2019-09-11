@@ -1,5 +1,5 @@
 import React, { Component, createContext, useState, useEffect, useContext } from 'react'
-import { UserSession, AppConfig, Person } from 'blockstack';
+import { UserSession, AppConfig, Person, lookupProfile } from 'blockstack';
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
 import { isNil, isEqual, isFunction, isUndefined, merge, set } from 'lodash'
 
@@ -263,3 +263,16 @@ export function AuthenticatedDocumentClass (props) {
     }
 
 export default BlockstackContext
+
+/* User Profiles ================================ */
+
+export function useProfile (username, zoneFileLookupURL) {
+    const [value, setValue] = useState(null)
+    const { userSession } = useBlockstack()
+    useEffect(() => {
+      if (userSession) {
+        lookupProfile(username, zoneFileLookupURL)
+        .then(setValue)
+      }})
+    return (value)
+}
