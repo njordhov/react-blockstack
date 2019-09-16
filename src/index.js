@@ -1,5 +1,5 @@
 import React, { Component, createContext, useState, useEffect, useContext } from 'react'
-import { UserSession, AppConfig, Person, lookupProfile } from 'blockstack';
+import { UserSession, AppConfig, Person, lookupProfile } from 'blockstack'
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
 import { isNil, isEqual, isFunction, isUndefined, merge, set } from 'lodash'
 
@@ -46,6 +46,7 @@ export function initBlockstack (options) {
   // Idempotent - mention in documentation!
   const { userSession } = deref(contextAtom)
   if (!userSession) {
+    const appConfig = (options instanceof AppConfig) ? options : AppConfig(...options)
     const userSession = new UserSession(options)
     const update = { userSession: userSession }
     setContext( update )
@@ -56,6 +57,9 @@ export function initBlockstack (options) {
     } else {
       setContext( { signIn: signIn })
     }
+    return(true)
+  } else {
+    return (null)
   }
 }
 
@@ -267,12 +271,14 @@ export default BlockstackContext
 /* User Profiles ================================ */
 
 export function useProfile (username, zoneFileLookupURL) {
+    // FIX: don't lookup if username is current profile...
     const [value, setValue] = useState(null)
     const { userSession } = useBlockstack()
     useEffect(() => {
-      if (userSession) {
+      if (userSession && username) {
         lookupProfile(username, zoneFileLookupURL)
         .then(setValue)
-      }})
+        .catch((err) => console.warn("Failed to use profile:", err))
+      }}, [userSession, username, zoneFileLookupURL])
     return (value)
 }

@@ -36,6 +36,14 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 var defaultValue = {
   userData: null,
   signIn: null,
@@ -97,6 +105,8 @@ function initBlockstack(options) {
       userSession = _deref3.userSession;
 
   if (!userSession) {
+    var appConfig = options instanceof _blockstack.AppConfig ? options : _blockstack.AppConfig.apply(void 0, _toConsumableArray(options));
+
     var _userSession = new _blockstack.UserSession(options);
 
     var update = {
@@ -113,6 +123,10 @@ function initBlockstack(options) {
         signIn: signIn
       });
     }
+
+    return true;
+  } else {
+    return null;
   }
 }
 
@@ -399,6 +413,7 @@ var _default = BlockstackContext;
 exports["default"] = _default;
 
 function useProfile(username, zoneFileLookupURL) {
+  // FIX: don't lookup if username is current profile...
   var _useState9 = (0, _react.useState)(null),
       _useState10 = _slicedToArray(_useState9, 2),
       value = _useState10[0],
@@ -408,9 +423,11 @@ function useProfile(username, zoneFileLookupURL) {
       userSession = _useBlockstack3.userSession;
 
   (0, _react.useEffect)(function () {
-    if (userSession) {
-      (0, _blockstack.lookupProfile)(username, zoneFileLookupURL).then(setValue);
+    if (userSession && username) {
+      (0, _blockstack.lookupProfile)(username, zoneFileLookupURL).then(setValue)["catch"](function (err) {
+        return console.warn("Failed to use profile:", err);
+      });
     }
-  });
+  }, [userSession, username, zoneFileLookupURL]);
   return value;
 }
