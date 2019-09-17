@@ -19,7 +19,7 @@ that pass these properties to components:
 
 ## Blockstack Authentication
 
-Execute as early as possible to initialize the Blockstack SDK and authenticate the user:
+Execute as early as possible to initialize the Blockstack SDK and eventually authenticate the user:
 
 ````javascript
 import { initBlockstack } from 'react-blockstack'
@@ -38,16 +38,19 @@ initBlockstack({appConfig})
 
 ## React Hook for Function Components
 
-The package provides a `useBlockStack` React hook for use in function components.
-It provides access to the Blockstack SDK while implicitly handling the authentication:
+The package provides a `useBlockStack` React hook for use in function components. It provides access to the Blockstack SDK and
+eventually an authenticated user:
 
     const {userSession, userData, signIn, signOut, person} = useBlockstack()
+
+Only `userSession` and `signIn` are available before authentication.
+After authentication, `signIn` is null, but there are bindings for
+`userData`, `signOut` and `person`.
 
 ### Example
 
 Here is a react function component that implements an authentication button.
-It handles both signin and logout, adapting the label depending on status and
-is disabled while authentication is pending:
+It handles both signin and logout, adapting the label depending on status, changing appearance to disabled while authentication is pending:
 
 ````javascript
 import { useBlockstack } from 'react-blockstack'
@@ -69,19 +72,16 @@ To include the button in jsx:
 
 ## React Class Components
 
-React hooks like `useBlockstack` is used inside function components.
 For conventional React class components, enclose elements in a shared Blockstack context:
 
     ReactDOM.render(<Blockstack><App /></Blockstack>,
                     document.getElementById('app-root'))
 
-The Blockstack SDK properties are implicitly passed through the component tree and can be
-used as any other React context.
+The Blockstack SDK properties are implicitly passed through the component tree and can be used as any other React context.
 
 ### Example
 
-The App component below will automatically be updated whenever there is a
-change in the Blockstack status.
+The App component below will automatically be updated whenever there is a change in the Blockstack status.
 Note the use of the `this.context` containing the properties and
 that the class is required to have `contextType = BlockstackContext`.
 

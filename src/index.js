@@ -86,11 +86,25 @@ function useStateWithLocalStorage (storageKey) {
 }
 
 function useStateWithGaiaStorage (path) {
-  // Low level gaia file hook
-  // Note: Does not guard against multiple hooks for the same file
-  // Possbly an issue that change is set then value, could introduce inconsisitent state
-  const [value, setValue] = useState(null)
-  const [change, setChange] = useState(null)
+  /* Low level gaia file hook
+     Note: Does not guard against multiple hooks for the same file
+     Possbly an issue that change is set then value, could introduce inconsisitent state
+     Return value:
+       1. File read -> content of file
+       2. File not existing or empty -> {} // could also be null
+       3. File not yet accessed or inaccessible -> undefined
+     Attempting to set value when undefined throws an error.
+  */
+  const [value, setValue] = useState(undefined)
+  const [change, setChange] = useState(undefined)
+  const updateValue = (update) => {
+    console.log("[File] update:", path, update)
+    if (!isUndefined(value)) {
+      setChange(update)
+    } else {
+      throw "Premature attempt to modify file:" + path
+    }
+  }
   console.log("[File]:", path, " = ", value)
   const { userSession, userData } = useBlockstack()
   const isUserSignedIn = !!userData
@@ -100,38 +114,42 @@ function useStateWithGaiaStorage (path) {
       if (isUserSignedIn && path) {
           userSession.getFile(path)
           .then(stored => {
-               console.info("[Get File]", path, value, stored)
+               console.info("[File] Get:", path, value, stored)
                const content = !isNil(stored) ? JSON.parse(stored) : {}
                setValue(content)
               })
            .catch(err => {
-             console.error("[Get File] Error:", err)
+             console.error("[File] Get error:", err)
            })
         } else if (path) {
-          console.info("[Get File] Waiting for user to sign on before loading:", path)
+          console.info("[File] Get waiting for user to sign on:", path)
         } else {
-          console.warn("[Get File] No file path")
+          console.warn("[File] No file path")
         }
+      } else {
+        console.log("[File] Get skip:", value)
       }}, [userSession, isUserSignedIn, path])
   useEffect(() => {
     if ( !isNil(change) ) {
          if (!isUserSignedIn) {
-           console.warn("[Put File] User not logged in")
+           console.warn("[File] User not logged in")
          } else if (!isEqual(change, value)){ // test should be redundant
            const content = JSON.stringify(change)
            const original = value
            setValue(change) // Cannot delay until saved as it will cause inconsistent state
            userSession.putFile(path, content)
-           .then(() => console.info("[Put File] ", path, content))
+           .then(() => console.info("[File] Put", path, content))
            .catch((err) => {
                // Don't revert on error for now as it impairs UX
                // setValue(original)
-               console.warn("[Put File] ", path, err)
+               console.warn("[File] Put error: ", path, err)
              })
+         } else {
+           console.log("[File] Put noop:", path)
          }
     }},[change, userSession])
   // FIX: deliver eventual error as third value?
-  return [value, setChange]
+  return [value, updateValue]
 }
 
 export function useStored (props) {
@@ -144,9 +162,9 @@ export function useStored (props) {
                             : useStateWithGaiaStorage(path)
   useEffect(() => {
     // Load data from file
-    if (!isNil(stored) && !isEqual (value, stored)) {
-        console.info("PERSISTENT Load:", value, stored)
-        if (version != stored.version) {
+    if (!isUndefined(stored) && !isNil(stored) && !isEqual (value, stored)) {
+        console.info("STORED load:", path, stored, "Current:", value)
+        if (stored.version && version != stored.version) {
           // ## Fix: better handling of version including migration
           console.error("Mismatching version in file", path, " - expected", version, "got", stored.version)
         }
@@ -155,19 +173,22 @@ export function useStored (props) {
         } else {
           console.warn("Missing setValue property for storing:", property)
         }
-  }}, [stored])
+      } else {
+        console.log("STORED pass:", path, stored, "Current:", value)
+      }
+  }, [stored])
 
   useEffect(() => {
       // Store content to file
-      if (!isUndefined(value) && !isEqual (value, stored && stored.content)) {
+      if (!isUndefined(stored) && !isUndefined(value) && !isEqual (value, stored && stored.content)) {
         const content = stored && stored.content
         const replacement = overwrite ? value : merge({}, content, value)
-        console.info("PERSISTENT save:", value, replacement)
+        console.info("STORED save:", path, replacement, "Was:", value)
         setStored({version: version, property: property, content: replacement})
       } else {
-        console.log("PERSISTENT noop:", value, stored)
+        console.log("STORED noop:", path, value, stored)
       }
-    }, [value])
+    }, [value, stored])
   return ( stored )
 }
 
