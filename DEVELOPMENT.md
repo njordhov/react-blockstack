@@ -23,6 +23,7 @@ without first publishing to npm (but see issues below).
 
 1. In this directory, execute:
 
+    npm install
     npm run build
     npm link
 
@@ -30,7 +31,7 @@ without first publishing to npm (but see issues below).
 
     npm link react-blockstack
 
-If `npm install` reports the module is not found, try deleting the package-lock.json or see this for other options:
+If `npm install` reports the package is not found, try deleting the package-lock.json or see this for other options:
 
 https://stackoverflow.com/questions/24550515/npm-after-npm-link-module-is-not-found
 

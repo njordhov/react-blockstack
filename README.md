@@ -19,7 +19,7 @@ that pass these properties to components:
 
 ## Setup
 
-Execute as early as possible to start the Blockstack authentication.
+Execute as early as possible to start the Blockstack authentication:
 
 ````javascript
 import { initBlockstack } from 'react-blockstack'
@@ -27,7 +27,14 @@ import { initBlockstack } from 'react-blockstack'
 initBlockstack()
 ````
 
-Optional argument: Blockstack AppConfig.
+Consider calling `initBlockstack()` from the index.js file of your project. For customization of the authentication, it takes the same options argument as [UserSession](https://blockstack.github.io/blockstack.js/classes/usersession.html) in the Blockstack SDK:
+
+````javascript
+import { AppConfig } from 'blockstack'
+
+const appConfig = new AppConfig(['store_write', 'publish_data'])
+initBlockstack({appConfig})
+````
 
 ## React Hook for Function Components
 

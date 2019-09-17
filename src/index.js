@@ -44,9 +44,9 @@ function handleAuthenticated (userData) {
 
 export function initBlockstack (options) {
   // Idempotent - mention in documentation!
+  console.log("init blockstack:", options)
   const { userSession } = deref(contextAtom)
   if (!userSession) {
-    const appConfig = (options instanceof AppConfig) ? options : AppConfig(...options)
     const userSession = new UserSession(options)
     const update = { userSession: userSession }
     setContext( update )
