@@ -17,14 +17,14 @@ that pass these properties to components:
 
     npm install react-blockstack
 
-## Setup
+## Blockstack Authentication
 
-Execute as early as possible to start the Blockstack authentication:
+Execute as early as possible to initialize the Blockstack SDK and authenticate the user:
 
 ````javascript
 import { initBlockstack } from 'react-blockstack'
 
-initBlockstack();
+initBlockstack()
 ````
 
 Consider calling `initBlockstack()` from the index.js file of your project. For customization of the authentication, it takes the same options argument as [UserSession](https://blockstack.github.io/blockstack.js/classes/usersession.html) in the Blockstack SDK:
