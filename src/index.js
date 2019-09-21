@@ -98,11 +98,11 @@ function useStateWithGaiaStorage (path) {
   const [value, setValue] = useState(undefined)
   const [change, setChange] = useState(undefined)
   const updateValue = (update) => {
-    console.log("[File] update:", path, update)
+    console.log("[File] Update:", path, update)
     if (!isUndefined(value)) {
       setChange(update)
     } else {
-      throw "Premature attempt to modify file:" + path
+      throw "Premature attempt to update file:" + path
     }
   }
   console.log("[File]:", path, " = ", value)
