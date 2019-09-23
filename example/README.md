@@ -4,6 +4,10 @@ This project was bootstrapped from the [Blockstack:React App Generator](https://
 
 ## Available Scripts
 
+First run:
+
+### `npm install`
+
 In the project directory, you can run:
 
 ### `npm start`

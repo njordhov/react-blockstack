@@ -17,10 +17,12 @@
     "url": "https://github.com/njordhov/react-blockstack/issues"
   },
   "homepage": "https://github.com/njordhov/react-blockstack#readme",
+  "peerDependencies": {
+    "blockstack": "^19.2.5",
+    "react": "^16.8.0"
+  },
   "dependencies": {
     "@dbeining/react-atom": "^4.1.1",
-    "blockstack": "^19.2.5",
-    "react": "^16.8.0",
     "lodash": "^4.17.5"
   },
   "devDependencies": {

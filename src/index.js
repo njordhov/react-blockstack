@@ -1,7 +1,7 @@
-import React, { Component, createContext, useState, useEffect, useContext } from 'react'
+import React, { Component, createContext, useState, useEffect, useContext, useCallback } from 'react'
 import { UserSession, AppConfig, Person, lookupProfile } from 'blockstack'
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
-import { isNil, isEqual, isFunction, isUndefined, merge, set } from 'lodash'
+import { isNil, isNull, isEqual, isFunction, isUndefined, merge, set, identity } from 'lodash'
 
 const defaultValue = {userData: null, signIn: null, signOut: null}
 
@@ -72,20 +72,73 @@ export function Blockstack(props) {
           </BlockstackContext.Provider>
 }
 
-/* Persistent Context */
+/*
+=======================================================================
+EXPERIMENTAL FUNCTIONALITY
+APT TO CHANGE WITHOUT FURTHER NOTICE
+=======================================================================
+*/
 
-function useStateWithLocalStorage (storageKey) {
-  const stored = localStorage.getItem(storageKey)
-  const content = (typeof stored != 'undefined') ? JSON.parse(stored) : null
-  console.log("PERSISTENT local:", stored, typeof stored)
-  const [value, setValue] = useState(content)
-  React.useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(value || null));
-  }, [value])
-  return [value, setValue];
+/* Low-level hooks for Gaia file system */
+
+export function useFilesList () {
+  /* First value is a list of files, defaults to empty list
+     Second value is null then number of files when list is complete.
+     FIX: Is number of files useful as output? What about errors? */
+  const { userSession, userData } = useBlockstack()
+  const isUserSignedIn = !!userData
+  const [value, setValue] = useState([])
+  const [fileCount, setCount] = useState(null)
+  const appendFile = useCallback(path => {value.push(path); return true})
+  useEffect( () => {
+    if (userSession && isUserSignedIn) {
+       userSession.listFiles(appendFile)
+       .then(setCount)
+       .catch((err) => console.warn("Failed retrieving files list:", err))
+  }}, [userSession, isUserSignedIn])
+  return ([value, fileCount])
 }
 
-function useStateWithGaiaStorage (path) {
+export function useFileUrl (path) {
+  // FIX: Should combine with others?
+  const { userSession, userData } = useBlockstack()
+  const [value, setValue] = useState(null)
+  useEffect( () => {
+    if (userSession) {
+      if (path) {
+        userSession.getFileUrl(path)
+        .then(setValue)
+        .catch((err) => console.warn("Failed getting file url:", err))
+      } else {
+        setValue(null)
+      }
+    }
+  }, [userSession, path])
+  return(value)
+}
+
+export function useFetch (path, init) {
+  // For internal uses, likely better covered by other libraries
+  const url = useFileUrl(path)
+  const [value, setValue] = useState(null)
+  useEffect ( () => {
+    if (url) {
+      fetch(url, init)
+      .then(setValue)
+      .catch((err) => console.warn("Failed fetching url:", err))
+    } else {
+      setValue(null)
+    }
+  }, [url])
+  return (value)
+}
+
+export function useFile (path) {
+  const [value, setValue] = useStateWithGaiaStorage (path, {reader:identity, writer:identity})
+  return ([value, !isUndefined(value) ? setValue : null ])
+}
+
+function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signed=false}) {
   /* Low level gaia file hook
      Note: Does not guard against multiple hooks for the same file
      Possbly an issue that change is set then value, could introduce inconsisitent state
@@ -115,7 +168,7 @@ function useStateWithGaiaStorage (path) {
           userSession.getFile(path)
           .then(stored => {
                console.info("[File] Get:", path, value, stored)
-               const content = !isNil(stored) ? JSON.parse(stored) : {}
+               const content = !isNil(stored) ? reader(stored) : {}
                setValue(content)
               })
            .catch(err => {
@@ -130,26 +183,42 @@ function useStateWithGaiaStorage (path) {
         console.log("[File] Get skip:", value)
       }}, [userSession, isUserSignedIn, path])
   useEffect(() => {
-    if ( !isNil(change) ) {
+    if ( !isUndefined(change) ) {
          if (!isUserSignedIn) {
            console.warn("[File] User not logged in")
          } else if (!isEqual(change, value)){ // test should be redundant
-           const content = JSON.stringify(change)
-           const original = value
-           setValue(change) // Cannot delay until saved as it will cause inconsistent state
-           userSession.putFile(path, content)
-           .then(() => console.info("[File] Put", path, content))
-           .catch((err) => {
-               // Don't revert on error for now as it impairs UX
-               // setValue(original)
-               console.warn("[File] Put error: ", path, err)
-             })
+           if (isNull(change)) {
+             userSession.deleteFile(path, {wasSigned: signed})
+             .then(setValue(null))
+             .catch((err) => console.warn("Failed deleting:", path, err))
+           } else {
+             const content = writer(change)
+             const original = value
+             setValue(change) // Cannot delay until saved? as it may cause inconsistent state
+             userSession.putFile(path, content)
+             .then(() => console.info("[File] Put", path, content))
+             .catch((err) => {
+                 // Don't revert on error for now as it impairs UX
+                 // setValue(original)
+                 console.warn("[File] Put error: ", path, err)
+               })}
          } else {
            console.log("[File] Put noop:", path)
          }
     }},[change, userSession])
   // FIX: deliver eventual error as third value?
   return [value, updateValue]
+}
+
+function useStateWithLocalStorage (storageKey) {
+  const stored = localStorage.getItem(storageKey)
+  const content = (typeof stored != 'undefined') ? JSON.parse(stored) : null
+  console.log("PERSISTENT local:", stored, typeof stored)
+  const [value, setValue] = useState(content)
+  React.useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(value || null));
+  }, [value])
+  return [value, setValue];
 }
 
 export function useStored (props) {
@@ -159,7 +228,7 @@ export function useStored (props) {
   const path = props.path || property
   const [stored, setStored] = props.local
                             ? useStateWithLocalStorage(path)
-                            : useStateWithGaiaStorage(path)
+                            : useStateWithGaiaStorage(path, {reader: JSON.parse, writer: JSON.stringify})
   useEffect(() => {
     // Load data from file
     if (!isUndefined(stored) && !isNil(stored) && !isEqual (value, stored)) {
