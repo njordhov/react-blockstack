@@ -72,6 +72,11 @@ export function Blockstack(props) {
           </BlockstackContext.Provider>
 }
 
+export function useFile (path) {
+  const [value, setValue] = useStateWithGaiaStorage (path, {reader:identity, writer:identity})
+  return ([value, !isUndefined(value) ? setValue : null ])
+}
+
 /*
 =======================================================================
 EXPERIMENTAL FUNCTIONALITY
@@ -133,11 +138,6 @@ export function useFetch (path, init) {
   return (value)
 }
 
-export function useFile (path) {
-  const [value, setValue] = useStateWithGaiaStorage (path, {reader:identity, writer:identity})
-  return ([value, !isUndefined(value) ? setValue : null ])
-}
-
 function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signed=false}) {
   /* Low level gaia file hook
      Note: Does not guard against multiple hooks for the same file
@@ -151,9 +151,14 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signe
   const [value, setValue] = useState(undefined)
   const [change, setChange] = useState(undefined)
   const updateValue = (update) => {
+    // ##FIX: properly handle update being a fn, call with (change || value)
     console.log("[File] Update:", path, update)
     if (!isUndefined(value)) {
-      setChange(update)
+      if (isFunction(update)) {
+        setchange(change => update(!isUndefined(change) ? change : value))
+      } else {
+        setChange(update)
+      }
     } else {
       throw "Premature attempt to update file:" + path
     }
@@ -194,9 +199,9 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signe
            } else {
              const content = writer(change)
              const original = value
-             setValue(change) // Cannot delay until saved? as it may cause inconsistent state
+             // setValue(change) // Cannot delay until saved? as it may cause inconsistent state
              userSession.putFile(path, content)
-             .then(() => console.info("[File] Put", path, content))
+             .then(() => {console.info("[File] Put", path, content); setValue(change)})
              .catch((err) => {
                  // Don't revert on error for now as it impairs UX
                  // setValue(original)

@@ -30,6 +30,7 @@ without first publishing to npm (but see issues below).
 2. In the dependent project top directory, execute:
 
     npm link react-blockstack
+    npm install
 
 If `npm install` reports the package is not found, try deleting the package-lock.json or see this for other options:
 
