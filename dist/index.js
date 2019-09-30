@@ -97,8 +97,7 @@ function handleAuthenticated(userData) {
 
 function initBlockstack(options) {
   // Idempotent - mention in documentation!
-  console.log("init blockstack:", options);
-
+  // console.log("init blockstack:", options)
   var _deref3 = (0, _reactAtom.deref)(contextAtom),
       userSession = _deref3.userSession;
 
@@ -242,8 +241,6 @@ function useStateWithGaiaStorage(path, _ref) {
       reader = _ref$reader === void 0 ? _lodash.identity : _ref$reader,
       _ref$writer = _ref.writer,
       writer = _ref$writer === void 0 ? _lodash.identity : _ref$writer,
-      _ref$signed = _ref.signed,
-      signed = _ref$signed === void 0 ? false : _ref$signed,
       _ref$initial = _ref.initial,
       initial = _ref$initial === void 0 ? null : _ref$initial;
 
@@ -317,9 +314,7 @@ function useStateWithGaiaStorage(path, _ref) {
       } else if (!(0, _lodash.isEqual)(change, value)) {
         // test should be redundant
         if ((0, _lodash.isNull)(change)) {
-          userSession.deleteFile(path, {
-            wasSigned: signed
-          }).then(setValue(null))["catch"](function (err) {
+          userSession.deleteFile(path).then(setValue(null))["catch"](function (err) {
             return console.warn("Failed deleting:", path, err);
           });
         } else {
