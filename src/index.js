@@ -138,7 +138,7 @@ export function useFetch (path, init) {
   return (value)
 }
 
-function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signed=false}) {
+function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signed=false, initial=null}) {
   /* Low level gaia file hook
      Note: Does not guard against multiple hooks for the same file
      Possbly an issue that change is set then value, could introduce inconsisitent state
@@ -173,7 +173,7 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signe
           userSession.getFile(path)
           .then(stored => {
                console.info("[File] Get:", path, value, stored)
-               const content = !isNil(stored) ? reader(stored) : {}
+               const content = !isNil(stored) ? reader(stored) : initial
                setValue(content)
               })
            .catch(err => {
@@ -233,7 +233,7 @@ export function useStored (props) {
   const path = props.path || property
   const [stored, setStored] = props.local
                             ? useStateWithLocalStorage(path)
-                            : useStateWithGaiaStorage(path, {reader: JSON.parse, writer: JSON.stringify})
+                            : useStateWithGaiaStorage(path, {reader: JSON.parse, writer: JSON.stringify, initial: {}})
   useEffect(() => {
     // Load data from file
     if (!isUndefined(stored) && !isNil(stored) && !isEqual (value, stored)) {
