@@ -44,7 +44,7 @@ function handleAuthenticated (userData) {
 
 export function initBlockstack (options) {
   // Idempotent - mention in documentation!
-  console.log("init blockstack:", options)
+  // console.log("init blockstack:", options)
   const { userSession } = deref(contextAtom)
   if (!userSession) {
     const userSession = new UserSession(options)
@@ -138,7 +138,7 @@ export function useFetch (path, init) {
   return (value)
 }
 
-function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signed=false, initial=null}) {
+function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initial=null}) {
   /* Low level gaia file hook
      Note: Does not guard against multiple hooks for the same file
      Possbly an issue that change is set then value, could introduce inconsisitent state
@@ -193,7 +193,7 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, signe
            console.warn("[File] User not logged in")
          } else if (!isEqual(change, value)){ // test should be redundant
            if (isNull(change)) {
-             userSession.deleteFile(path, {wasSigned: signed})
+             userSession.deleteFile(path)
              .then(setValue(null))
              .catch((err) => console.warn("Failed deleting:", path, err))
            } else {
