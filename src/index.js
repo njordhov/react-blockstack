@@ -7,6 +7,16 @@ const defaultValue = {userData: null, signIn: null, signOut: null}
 
 const contextAtom = Atom.of(defaultValue)
 
+/**
+ * React hook for the Blockstack SDK
+ *
+ * @return {{userSession: UserSession, userData: ?UserData, signIn: ?function, signOut: ?function, person: ?Person}} Blockstack SDK context
+ *
+ * @example
+ *
+ *     useBlockstack()
+ */
+
 export function useBlockstack () {
   return( useAtom(contextAtom) )
 }
@@ -43,8 +53,7 @@ function handleAuthenticated (userData) {
 }
 
 export function initBlockstack (options) {
-  // Idempotent - mention in documentation!
-  // console.log("init blockstack:", options)
+  // Idempotent
   const { userSession } = deref(contextAtom)
   if (!userSession) {
     const userSession = new UserSession(options)
@@ -57,9 +66,9 @@ export function initBlockstack (options) {
     } else {
       setContext( { signIn: signIn })
     }
-    return(true)
+    return({ userSession: userSession })
   } else {
-    return (null)
+    return({ userSession: userSession })
   }
 }
 
