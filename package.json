@@ -1,15 +1,19 @@
 {
   "name": "react-blockstack",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "React hooks for the Blockstack SDK",
-  "main": "dist/index.js",
+  "directories": {
+    "context": "./dist/context"
+  },
+  "main": "./dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/njordhov/react-blockstack.git"
   },
   "keywords": [
     "react",
-    "blockstack"
+    "blockstack",
+    "hooks"
   ],
   "author": "Terje Norderhaug",
   "license": "MIT",

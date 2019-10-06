@@ -81,6 +81,8 @@ export function Blockstack(props) {
           </BlockstackContext.Provider>
 }
 
+export default BlockstackContext
+
 export function useFile (path) {
   const [value, setValue] = useStateWithGaiaStorage (path, {reader:identity, writer:identity})
   return ([value, !isUndefined(value) ? setValue : null ])
@@ -369,8 +371,6 @@ export function AuthenticatedDocumentClass (props) {
       }}, [userData])
     return (null)
     }
-
-export default BlockstackContext
 
 /* User Profiles ================================ */
 

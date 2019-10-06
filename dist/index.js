@@ -148,6 +148,9 @@ function Blockstack(props) {
   }, props.children);
 }
 
+var _default = BlockstackContext;
+exports["default"] = _default;
+
 function useFile(path) {
   var _useStateWithGaiaStor = useStateWithGaiaStorage(path, {
     reader: _lodash.identity,
@@ -559,11 +562,8 @@ function AuthenticatedDocumentClass(props) {
   }, [userData]);
   return null;
 }
-
-var _default = BlockstackContext;
 /* User Profiles ================================ */
 
-exports["default"] = _default;
 
 function useProfile(username, zoneFileLookupURL) {
   // FIX: don't lookup if username is current profile...

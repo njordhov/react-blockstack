@@ -6,14 +6,12 @@ Object.defineProperty(exports, "__esModule", {
 Object.defineProperty(exports, "Blockstack", {
   enumerable: true,
   get: function get() {
-    return _index["default"];
+    return _index.Blockstack;
   }
 });
 exports["default"] = void 0;
 
-var _index = _interopRequireDefault(require("./index.js"));
+var _index = require("../index.js");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _default = _index["default"];
+var _default = _index.BlockstackContext;
 exports["default"] = _default;

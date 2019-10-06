@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import BlockstackContext from 'react-blockstack'
+import BlockstackContext from 'react-blockstack/dist/context'
+
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 
 function Auth ({signOut}) {

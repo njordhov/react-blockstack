@@ -77,8 +77,11 @@ To include the button in jsx:
 
 For conventional React class components, enclose elements in a shared Blockstack context:
 
-    ReactDOM.render(<Blockstack><App /></Blockstack>,
-                    document.getElementById('app-root'))
+````javascript
+import { Blockstack } from 'react-blockstack/dist/context'
+
+ReactDOM.render(<Blockstack><App/></Blockstack>, document.getElementById('app-root'))
+````
 
 The Blockstack SDK properties are implicitly passed through the component tree and can be used as any other React context.
 
@@ -89,7 +92,7 @@ Note the use of the `this.context` containing the properties and
 that the class is required to have `contextType = BlockstackContext`.
 
 ````javascript
-import BlockstackContext from 'react-blockstack'
+import BlockstackContext from 'react-blockstack/dist/context'
 
 export default class App extends Component {
   render() {
