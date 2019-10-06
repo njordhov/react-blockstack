@@ -8,9 +8,9 @@ Handles Blockstack authentication and provides a
 that pass these properties to components:
 
 * `userSession` (Blockstack interface)
-* `userData` (when authenticated)
-* `signIn` (null when logged in or pending)
-* `signOut` (null when not logged in or pending)
+* `userData` (A UserData object from the Blockstack SDK; `null` unless authenticated)
+* `signIn` (function to sign in the user; `null` when logged in or pending)
+* `signOut` (function to sign out the user; `null` when not logged in or pending)
 * `person` (if authenticated, a Person instance containing the user profile)
 
 ## Installation
@@ -24,7 +24,7 @@ Execute as early as possible to initialize the Blockstack SDK and eventually aut
 ````javascript
 import { initBlockstack } from 'react-blockstack'
 
-initBlockstack()
+const { userSession } = initBlockstack()
 ````
 
 Consider calling `initBlockstack()` from the index.js file of your project. For customization of the authentication, it takes the same options argument as [UserSession](https://blockstack.github.io/blockstack.js/classes/usersession.html) in the Blockstack SDK:
@@ -33,8 +33,10 @@ Consider calling `initBlockstack()` from the index.js file of your project. For 
 import { AppConfig } from 'blockstack'
 
 const appConfig = new AppConfig(['store_write', 'publish_data'])
-initBlockstack({appConfig})
+const { userSession } = initBlockstack({appConfig})
 ````
+
+The return value from initBlockstack is ignorable as userSession is available from the provided react hook.
 
 ## React Hook for Function Components
 
