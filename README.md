@@ -36,7 +36,8 @@ const appConfig = new AppConfig(['store_write', 'publish_data'])
 const { userSession } = initBlockstack({appConfig})
 ````
 
-The return value from initBlockstack is ignorable as userSession is available from the provided react hook.
+Note that it is typically preferable to get `userSession` from the `useBlockstack` hook,
+ignoring the return value from `initBlockstack`.
 
 ## React Hook for Function Components
 
