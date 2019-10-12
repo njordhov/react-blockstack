@@ -84,7 +84,7 @@ export function Blockstack(props) {
 }
 
 export function useFile (path, options) {
-  const [value, setValue] = useStateWithGaiaStorage (path, {reader:identity, writer:identity}))
+  const [value, setValue] = useStateWithGaiaStorage (path, merge({reader:identity, writer:identity, initial: null}, options))
   return ([value, !isUndefined(value) ? setValue : null ])
 }
 

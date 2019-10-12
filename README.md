@@ -22,27 +22,26 @@ that pass these properties to components:
 Execute as early as possible to initialize the Blockstack SDK and eventually authenticate the user:
 
 ````javascript
-import { initBlockstack } from 'react-blockstack'
+import ReactBlockstack from 'react-blockstack'
 
-const { userSession } = initBlockstack()
+const { userSession } = ReactBlockstack()
 ````
 
-Consider calling `initBlockstack()` from the index.js file of your project. For customization of the authentication, it takes the same options argument as [UserSession](https://blockstack.github.io/blockstack.js/classes/usersession.html) in the Blockstack SDK:
+Consider placing in the top level index.js file of your project. For customization of the authentication, use the same options argument as [UserSession](https://blockstack.github.io/blockstack.js/classes/usersession.html) in the Blockstack SDK:
 
 ````javascript
 import { AppConfig } from 'blockstack'
 
 const appConfig = new AppConfig(['store_write', 'publish_data'])
-const { userSession } = initBlockstack({appConfig})
+const { userSession } = ReactBlockstack({appConfig})
 ````
 
 Note that it is typically preferable to get `userSession` from the `useBlockstack` hook,
-ignoring the return value from `initBlockstack`.
+ignoring the return value from `ReactBlockstack`.
 
 ## React Hook for Function Components
 
-The package provides a `useBlockStack` React hook for use in function components. It provides access to the Blockstack SDK and
-eventually an authenticated user:
+The package provides a `useBlockStack` React hook for use in function components. It provides access to the Blockstack SDK and eventually an authenticated user:
 
     const {userSession, userData, signIn, signOut, person} = useBlockstack()
 
@@ -119,9 +118,8 @@ The [example](https://github.com/njordhov/react-blockstack/tree/master/example)
 in the source repository is a reimplementation of the
 [Blockstack react template](https://github.com/blockstack/blockstack-app-generator/tree/master/react/templates).
 
-It demonstrates different ways of using react-useBlockStack in place of hairy
-code to use the mutable Blockstack api from react.
-Feel free to use the example as a starting point for your own projects.
+It demonstrates different ways of using react-blockStack.
+You are encouraged to use the example as a starting point for your own projects.
 
 Live at:
 [![Netlify Status](https://api.netlify.com/api/v1/badges/4c1f3c5b-c184-4659-935a-c66065978127/deploy-status)](https://react-blockstack.netlify.com)

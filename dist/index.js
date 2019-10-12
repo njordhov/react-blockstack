@@ -18,7 +18,7 @@ exports.createAppManifestHook = createAppManifestHook;
 exports.useAppManifest = useAppManifest;
 exports.AuthenticatedDocumentClass = AuthenticatedDocumentClass;
 exports.useProfile = useProfile;
-exports["default"] = exports.BlockstackContext = void 0;
+exports.BlockstackContext = exports["default"] = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
@@ -138,6 +138,8 @@ function initBlockstack(options) {
   }
 }
 
+var _default = initBlockstack;
+exports["default"] = _default;
 var BlockstackContext = (0, _react.createContext)(defaultValue);
 exports.BlockstackContext = BlockstackContext;
 
@@ -148,108 +150,17 @@ function Blockstack(props) {
   }, props.children);
 }
 
-var _default = BlockstackContext;
-exports["default"] = _default;
-
-function useFile(path) {
-  var _useStateWithGaiaStor = useStateWithGaiaStorage(path, {
+function useFile(path, options) {
+  var _useStateWithGaiaStor = useStateWithGaiaStorage(path, (0, _lodash.merge)({
     reader: _lodash.identity,
-    writer: _lodash.identity
-  }),
+    writer: _lodash.identity,
+    initial: null
+  }, options)),
       _useStateWithGaiaStor2 = _slicedToArray(_useStateWithGaiaStor, 2),
       value = _useStateWithGaiaStor2[0],
       setValue = _useStateWithGaiaStor2[1];
 
   return [value, !(0, _lodash.isUndefined)(value) ? setValue : null];
-}
-/*
-=======================================================================
-EXPERIMENTAL FUNCTIONALITY
-APT TO CHANGE WITHOUT FURTHER NOTICE
-=======================================================================
-*/
-
-/* Low-level hooks for Gaia file system */
-
-
-function useFilesList() {
-  /* First value is a list of files, defaults to empty list
-     Second value is null then number of files when list is complete.
-     FIX: Is number of files useful as output? What about errors? */
-  var _useBlockstack = useBlockstack(),
-      userSession = _useBlockstack.userSession,
-      userData = _useBlockstack.userData;
-
-  var isUserSignedIn = !!userData;
-
-  var _useState = (0, _react.useState)([]),
-      _useState2 = _slicedToArray(_useState, 2),
-      value = _useState2[0],
-      setValue = _useState2[1];
-
-  var _useState3 = (0, _react.useState)(null),
-      _useState4 = _slicedToArray(_useState3, 2),
-      fileCount = _useState4[0],
-      setCount = _useState4[1];
-
-  var appendFile = (0, _react.useCallback)(function (path) {
-    value.push(path);
-    return true;
-  });
-  (0, _react.useEffect)(function () {
-    if (userSession && isUserSignedIn) {
-      userSession.listFiles(appendFile).then(setCount)["catch"](function (err) {
-        return console.warn("Failed retrieving files list:", err);
-      });
-    }
-  }, [userSession, isUserSignedIn]);
-  return [value, fileCount];
-}
-
-function useFileUrl(path) {
-  // FIX: Should combine with others?
-  var _useBlockstack2 = useBlockstack(),
-      userSession = _useBlockstack2.userSession,
-      userData = _useBlockstack2.userData;
-
-  var _useState5 = (0, _react.useState)(null),
-      _useState6 = _slicedToArray(_useState5, 2),
-      value = _useState6[0],
-      setValue = _useState6[1];
-
-  (0, _react.useEffect)(function () {
-    if (userSession) {
-      if (path) {
-        userSession.getFileUrl(path).then(setValue)["catch"](function (err) {
-          return console.warn("Failed getting file url:", err);
-        });
-      } else {
-        setValue(null);
-      }
-    }
-  }, [userSession, path]);
-  return value;
-}
-
-function useFetch(path, init) {
-  // For internal uses, likely better covered by other libraries
-  var url = useFileUrl(path);
-
-  var _useState7 = (0, _react.useState)(null),
-      _useState8 = _slicedToArray(_useState7, 2),
-      value = _useState8[0],
-      setValue = _useState8[1];
-
-  (0, _react.useEffect)(function () {
-    if (url) {
-      fetch(url, init).then(setValue)["catch"](function (err) {
-        return console.warn("Failed fetching url:", err);
-      });
-    } else {
-      setValue(null);
-    }
-  }, [url]);
-  return value;
 }
 
 function useStateWithGaiaStorage(path, _ref) {
@@ -269,20 +180,19 @@ function useStateWithGaiaStorage(path, _ref) {
        3. File not yet accessed or inaccessible -> undefined
      Attempting to set value when undefined throws an error.
   */
-  var _useState9 = (0, _react.useState)(undefined),
-      _useState10 = _slicedToArray(_useState9, 2),
-      value = _useState10[0],
-      setValue = _useState10[1];
+  var _useState = (0, _react.useState)(undefined),
+      _useState2 = _slicedToArray(_useState, 2),
+      value = _useState2[0],
+      setValue = _useState2[1];
 
-  var _useState11 = (0, _react.useState)(undefined),
-      _useState12 = _slicedToArray(_useState11, 2),
-      change = _useState12[0],
-      setChange = _useState12[1];
+  var _useState3 = (0, _react.useState)(undefined),
+      _useState4 = _slicedToArray(_useState3, 2),
+      change = _useState4[0],
+      setChange = _useState4[1];
 
   var updateValue = function updateValue(update) {
     // ##FIX: properly handle update being a fn, call with (change || value)
-    console.log("[File] Update:", path, update);
-
+    //console.log("[File] Update:", path, update)
     if (!(0, _lodash.isUndefined)(value)) {
       if ((0, _lodash.isFunction)(update)) {
         setchange(function (change) {
@@ -294,13 +204,12 @@ function useStateWithGaiaStorage(path, _ref) {
     } else {
       throw "Premature attempt to update file:" + path;
     }
-  };
+  }; //console.log("[File]:", path, " = ", value)
 
-  console.log("[File]:", path, " = ", value);
 
-  var _useBlockstack3 = useBlockstack(),
-      userSession = _useBlockstack3.userSession,
-      userData = _useBlockstack3.userData;
+  var _useBlockstack = useBlockstack(),
+      userSession = _useBlockstack.userSession,
+      userData = _useBlockstack.userData;
 
   var isUserSignedIn = !!userData; // React roadmap is to support data loading with Suspense hook
 
@@ -308,7 +217,7 @@ function useStateWithGaiaStorage(path, _ref) {
     if ((0, _lodash.isNil)(value)) {
       if (isUserSignedIn && path) {
         userSession.getFile(path).then(function (stored) {
-          console.info("[File] Get:", path, value, stored);
+          //console.info("[File] Get:", path, value, stored)
           var content = !(0, _lodash.isNil)(stored) ? reader(stored) : initial;
           setValue(content);
         })["catch"](function (err) {
@@ -319,8 +228,7 @@ function useStateWithGaiaStorage(path, _ref) {
       } else {
         console.warn("[File] No file path");
       }
-    } else {
-      console.log("[File] Get skip:", value);
+    } else {//console.log("[File] Get skip:", value)
     }
   }, [userSession, isUserSignedIn, path]);
   (0, _react.useEffect)(function () {
@@ -338,7 +246,7 @@ function useStateWithGaiaStorage(path, _ref) {
           var original = value; // setValue(change) // Cannot delay until saved? as it may cause inconsistent state
 
           userSession.putFile(path, content).then(function () {
-            console.info("[File] Put", path, content);
+            // console.info("[File] Put", path, content);
             setValue(change);
           })["catch"](function (err) {
             // Don't revert on error for now as it impairs UX
@@ -346,13 +254,101 @@ function useStateWithGaiaStorage(path, _ref) {
             console.warn("[File] Put error: ", path, err);
           });
         }
-      } else {
-        console.log("[File] Put noop:", path);
+      } else {// console.log("[File] Put noop:", path)
       }
     }
   }, [change, userSession]); // FIX: deliver eventual error as third value?
 
   return [value, updateValue];
+}
+/*
+=======================================================================
+EXPERIMENTAL FUNCTIONALITY
+APT TO CHANGE WITHOUT FURTHER NOTICE
+=======================================================================
+*/
+
+/* Low-level hooks for Gaia file system */
+
+
+function useFilesList() {
+  /* First value is a list of files, defaults to empty list
+     Second value is null then number of files when list is complete.
+     FIX: Is number of files useful as output? What about errors? */
+  var _useBlockstack2 = useBlockstack(),
+      userSession = _useBlockstack2.userSession,
+      userData = _useBlockstack2.userData;
+
+  var isUserSignedIn = !!userData;
+
+  var _useState5 = (0, _react.useState)([]),
+      _useState6 = _slicedToArray(_useState5, 2),
+      value = _useState6[0],
+      setValue = _useState6[1];
+
+  var _useState7 = (0, _react.useState)(null),
+      _useState8 = _slicedToArray(_useState7, 2),
+      fileCount = _useState8[0],
+      setCount = _useState8[1];
+
+  var appendFile = (0, _react.useCallback)(function (path) {
+    value.push(path);
+    return true;
+  });
+  (0, _react.useEffect)(function () {
+    if (userSession && isUserSignedIn) {
+      userSession.listFiles(appendFile).then(setCount)["catch"](function (err) {
+        return console.warn("Failed retrieving files list:", err);
+      });
+    }
+  }, [userSession, isUserSignedIn]);
+  return [value, fileCount];
+}
+
+function useFileUrl(path) {
+  // FIX: Should combine with others?
+  var _useBlockstack3 = useBlockstack(),
+      userSession = _useBlockstack3.userSession,
+      userData = _useBlockstack3.userData;
+
+  var _useState9 = (0, _react.useState)(null),
+      _useState10 = _slicedToArray(_useState9, 2),
+      value = _useState10[0],
+      setValue = _useState10[1];
+
+  (0, _react.useEffect)(function () {
+    if (userSession) {
+      if (path) {
+        userSession.getFileUrl(path).then(setValue)["catch"](function (err) {
+          return console.warn("Failed getting file url:", err);
+        });
+      } else {
+        setValue(null);
+      }
+    }
+  }, [userSession, path]);
+  return value;
+}
+
+function useFetch(path, init) {
+  // For internal uses, likely better covered by other libraries
+  var url = useFileUrl(path);
+
+  var _useState11 = (0, _react.useState)(null),
+      _useState12 = _slicedToArray(_useState11, 2),
+      value = _useState12[0],
+      setValue = _useState12[1];
+
+  (0, _react.useEffect)(function () {
+    if (url) {
+      fetch(url, init).then(setValue)["catch"](function (err) {
+        return console.warn("Failed fetching url:", err);
+      });
+    } else {
+      setValue(null);
+    }
+  }, [url]);
+  return value;
 }
 
 function useStateWithLocalStorage(storageKey) {
