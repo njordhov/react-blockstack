@@ -72,6 +72,8 @@ export function initBlockstack (options) {
   }
 }
 
+export default initBlockstack
+
 export const BlockstackContext = createContext(defaultValue)
 
 export function Blockstack(props) {
@@ -81,13 +83,10 @@ export function Blockstack(props) {
           </BlockstackContext.Provider>
 }
 
-export default BlockstackContext
-
-export function useFile (path) {
-  const [value, setValue] = useStateWithGaiaStorage (path, {reader:identity, writer:identity})
+export function useFile (path, options) {
+  const [value, setValue] = useStateWithGaiaStorage (path, {reader:identity, writer:identity}))
   return ([value, !isUndefined(value) ? setValue : null ])
 }
-
 
 function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initial=null}) {
   /* Low level gaia file hook
