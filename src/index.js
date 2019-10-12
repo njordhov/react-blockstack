@@ -88,6 +88,86 @@ export function useFile (path) {
   return ([value, !isUndefined(value) ? setValue : null ])
 }
 
+
+function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initial=null}) {
+  /* Low level gaia file hook
+     Note: Does not guard against multiple hooks for the same file
+     Possbly an issue that change is set then value, could introduce inconsisitent state
+     Return value:
+       1. File read -> content of file
+       2. File not existing or empty -> {} // could also be null
+       3. File not yet accessed or inaccessible -> undefined
+     Attempting to set value when undefined throws an error.
+  */
+  const [value, setValue] = useState(undefined)
+  const [change, setChange] = useState(undefined)
+  const updateValue = (update) => {
+    // ##FIX: properly handle update being a fn, call with (change || value)
+    //console.log("[File] Update:", path, update)
+    if (!isUndefined(value)) {
+      if (isFunction(update)) {
+        setchange(change => update(!isUndefined(change) ? change : value))
+      } else {
+        setChange(update)
+      }
+    } else {
+      throw "Premature attempt to update file:" + path
+    }
+  }
+  //console.log("[File]:", path, " = ", value)
+  const { userSession, userData } = useBlockstack()
+  const isUserSignedIn = !!userData
+  // React roadmap is to support data loading with Suspense hook
+  useEffect (() => {
+    if ( isNil(value) ) {
+      if (isUserSignedIn && path) {
+          userSession.getFile(path)
+          .then(stored => {
+               //console.info("[File] Get:", path, value, stored)
+               const content = !isNil(stored) ? reader(stored) : initial
+               setValue(content)
+              })
+           .catch(err => {
+             console.error("[File] Get error:", err)
+           })
+        } else if (path) {
+          console.info("[File] Get waiting for user to sign on:", path)
+        } else {
+          console.warn("[File] No file path")
+        }
+      } else {
+        //console.log("[File] Get skip:", value)
+      }}, [userSession, isUserSignedIn, path])
+  useEffect(() => {
+    if ( !isUndefined(change) ) {
+         if (!isUserSignedIn) {
+           console.warn("[File] User not logged in")
+         } else if (!isEqual(change, value)){ // test should be redundant
+           if (isNull(change)) {
+             userSession.deleteFile(path)
+             .then(setValue(null))
+             .catch((err) => console.warn("Failed deleting:", path, err))
+           } else {
+             const content = writer(change)
+             const original = value
+             // setValue(change) // Cannot delay until saved? as it may cause inconsistent state
+             userSession.putFile(path, content)
+             .then(() => {
+               // console.info("[File] Put", path, content);
+               setValue(change)})
+             .catch((err) => {
+                 // Don't revert on error for now as it impairs UX
+                 // setValue(original)
+                 console.warn("[File] Put error: ", path, err)
+               })}
+         } else {
+           // console.log("[File] Put noop:", path)
+         }
+    }},[change, userSession])
+  // FIX: deliver eventual error as third value?
+  return [value, updateValue]
+}
+
 /*
 =======================================================================
 EXPERIMENTAL FUNCTIONALITY
@@ -147,83 +227,6 @@ export function useFetch (path, init) {
     }
   }, [url])
   return (value)
-}
-
-function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initial=null}) {
-  /* Low level gaia file hook
-     Note: Does not guard against multiple hooks for the same file
-     Possbly an issue that change is set then value, could introduce inconsisitent state
-     Return value:
-       1. File read -> content of file
-       2. File not existing or empty -> {} // could also be null
-       3. File not yet accessed or inaccessible -> undefined
-     Attempting to set value when undefined throws an error.
-  */
-  const [value, setValue] = useState(undefined)
-  const [change, setChange] = useState(undefined)
-  const updateValue = (update) => {
-    // ##FIX: properly handle update being a fn, call with (change || value)
-    console.log("[File] Update:", path, update)
-    if (!isUndefined(value)) {
-      if (isFunction(update)) {
-        setchange(change => update(!isUndefined(change) ? change : value))
-      } else {
-        setChange(update)
-      }
-    } else {
-      throw "Premature attempt to update file:" + path
-    }
-  }
-  console.log("[File]:", path, " = ", value)
-  const { userSession, userData } = useBlockstack()
-  const isUserSignedIn = !!userData
-  // React roadmap is to support data loading with Suspense hook
-  useEffect (() => {
-    if ( isNil(value) ) {
-      if (isUserSignedIn && path) {
-          userSession.getFile(path)
-          .then(stored => {
-               console.info("[File] Get:", path, value, stored)
-               const content = !isNil(stored) ? reader(stored) : initial
-               setValue(content)
-              })
-           .catch(err => {
-             console.error("[File] Get error:", err)
-           })
-        } else if (path) {
-          console.info("[File] Get waiting for user to sign on:", path)
-        } else {
-          console.warn("[File] No file path")
-        }
-      } else {
-        console.log("[File] Get skip:", value)
-      }}, [userSession, isUserSignedIn, path])
-  useEffect(() => {
-    if ( !isUndefined(change) ) {
-         if (!isUserSignedIn) {
-           console.warn("[File] User not logged in")
-         } else if (!isEqual(change, value)){ // test should be redundant
-           if (isNull(change)) {
-             userSession.deleteFile(path)
-             .then(setValue(null))
-             .catch((err) => console.warn("Failed deleting:", path, err))
-           } else {
-             const content = writer(change)
-             const original = value
-             // setValue(change) // Cannot delay until saved? as it may cause inconsistent state
-             userSession.putFile(path, content)
-             .then(() => {console.info("[File] Put", path, content); setValue(change)})
-             .catch((err) => {
-                 // Don't revert on error for now as it impairs UX
-                 // setValue(original)
-                 console.warn("[File] Put error: ", path, err)
-               })}
-         } else {
-           console.log("[File] Put noop:", path)
-         }
-    }},[change, userSession])
-  // FIX: deliver eventual error as third value?
-  return [value, updateValue]
 }
 
 function useStateWithLocalStorage (storageKey) {
