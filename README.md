@@ -1,17 +1,9 @@
 # React Blockstack
 
-Use the Blockstack SDK with React.
+React hooks to use the [Blockstack SDK](https://blockstack.github.io/blockstack.js/)
+with [react function components](https://reactjs.org/docs/components-and-props.html).
 
-Handles Blockstack authentication and provides a
-`useBlockstack` React hook and an optional
-[React context object](https://reactjs.org/docs/context.html)
-that pass these properties to components:
-
-* `userSession` (Blockstack interface)
-* `userData` (A UserData object from the Blockstack SDK; `null` unless authenticated)
-* `signIn` (function to sign in the user; `null` when logged in or pending)
-* `signOut` (function to sign out the user; `null` when not logged in or pending)
-* `person` (if authenticated, a Person instance containing the user profile)
+Includes backward compatibility with react class components.
 
 ## Installation
 
@@ -45,9 +37,18 @@ The package provides a `useBlockStack` React hook for use in function components
 
     const {userSession, userData, signIn, signOut, person} = useBlockstack()
 
+The hook returns these properties:
+
+* `userSession` (UserSession interface for the Blockstack SDK)
+* `userData` (UserData interface from the Blockstack SDK; `null` unless authenticated)
+* `signIn` (function to sign in the user; `null` when logged in or pending)
+* `signOut` (function to sign out the user; `null` when not logged in or pending)
+* `person` (if authenticated, a Person instance containing the user profile)
+
 Only `userSession` and `signIn` are available before authentication.
 After authentication, `signIn` is null, but there are bindings for
-`userData`, `signOut` and `person`.
+`userData`, `signOut` and `person`. This can be used for conditional rendering
+depending on the authentication status.
 
 ### Example
 
@@ -89,7 +90,11 @@ const [content, setContent] = useFile("content")
 
 ## React Class Components
 
-For conventional React class components, enclose elements in a shared Blockstack context:
+For conventional React class components, the package provides an optional
+[React context object](https://reactjs.org/docs/context.html)
+that pass properties from `useBlockstack` down to components.
+
+Enclose top level elements in a shared Blockstack context:
 
 ````javascript
 import { Blockstack } from 'react-blockstack/dist/context'
