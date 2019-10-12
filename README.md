@@ -72,6 +72,21 @@ To include the button in jsx:
 
     <Auth />
 
+## Persistent Data Storage
+
+The `useFile(path: string)` hook is used to access the app's data store, covering
+the functionality of `getFile`, `putFile` and `deleteFile` in the Blockstack SDK.
+
+The argument is a pathname in the app's data store. The file does not have to exists before the call.
+
+The `useFile` hook returns the content of the file like `getFile`, and a function to change the file content as second value. The returned content is `undefined` until the file has been accessed and `null` if the file is determined not to exist. The setter accepts the same content types as `putFile`, and will delete the file if called with `null`. The content returned by `useFile` is conservatively updated after storing the content.
+
+### Example
+
+```javascript
+const [content, setContent] = useFile("content")
+```
+
 ## React Class Components
 
 For conventional React class components, enclose elements in a shared Blockstack context:
