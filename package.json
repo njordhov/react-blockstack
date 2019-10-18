@@ -1,6 +1,6 @@
 {
   "name": "react-blockstack",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "React hooks for the Blockstack SDK",
   "directories": {
     "context": "./dist/context"
