@@ -1,4 +1,4 @@
-import React, { Component, createContext, useState, useEffect, useContext, useCallback } from 'react'
+import React, { Component, createContext, useState, useEffect, useContext, useCallback, useReducer } from 'react'
 import { UserSession, AppConfig, Person, lookupProfile } from 'blockstack'
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
 import { isNil, isNull, isEqual, isFunction, isUndefined, merge, set, identity } from 'lodash'
@@ -88,6 +88,45 @@ export function useFile (path, options) {
   return ([value, !isUndefined(value) ? setValue : null ])
 }
 
+/*
+function gaiaReducer (state, event) {
+  // state machine for gaia file operations
+  console.debug("Gaia:", state, event)
+  switch (state.status) {
+    case "start":
+      switch (event.action) {
+        case "reading": return({...state, status: "reading", pending: true})
+      }
+    case "reading":
+      switch (event.action) {
+        case "read-error": return({...state, status: "read-error", error: event.error})
+        case "no-file": return ({...state, status: "no-file"})
+        case "read-success": return({...state, status: "ready", content: event.content, pending: false})
+      }
+    case "no-file":
+      switch (event.action) {
+        case "writing": return({...state, status: "writing", content: event.content})
+      }
+    case "writing":
+      switch (event.action) {
+        case "write-error": return({...state, status: "write-error", error: event.error})
+        case "write-complete": return({...state, status: "ready", content: event.content})
+      }
+    case "ready":
+      switch (event.action) {
+        case "writing": return({...state, status: "writing", content: event.content})
+        case "deleting": return({...state, status: "deleting", content: event.content})
+      }
+    case "deleting":
+      switch (event.action) {
+        case "delete-error": return({...state, status: "delete-error", error: event.error})
+        case "delete-complete": return ({...state, status: "no-file", content: null})
+      }
+    default: return (state)
+  }
+}
+*/
+
 function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initial=null}) {
   /* Low level gaia file hook
      Note: Does not guard against multiple hooks for the same file
@@ -100,6 +139,9 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initi
   */
   const [value, setValue] = useState(undefined)
   const [change, setChange] = useState(undefined)
+  const [pending, setPending] = useState(false)
+  // const [{status, pending}, dispatch] = useReducer(gaiaReducer, {:status: "start"})
+
   const updateValue = (update) => {
     // ##FIX: properly handle update being a fn, call with (change || value)
     //console.log("[File] Update:", path, update)
@@ -120,49 +162,58 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initi
   useEffect (() => {
     if ( isNil(value) ) {
       if (isUserSignedIn && path) {
+          setPending(true)
           userSession.getFile(path)
           .then(stored => {
                //console.info("[File] Get:", path, value, stored)
                const content = !isNil(stored) ? reader(stored) : initial
                setValue(content)
+               setPending(false)
               })
            .catch(err => {
+             // retry?
              console.error("[File] Get error:", err)
            })
         } else if (path) {
-          console.info("[File] Get waiting for user to sign on:", path)
+          console.info("Waiting for user to sign on before reading file:", path)
         } else {
           console.warn("[File] No file path")
         }
       } else {
         //console.log("[File] Get skip:", value)
       }}, [userSession, isUserSignedIn, path])
+      
   useEffect(() => {
-    if ( !isUndefined(change) ) {
+    if ( !isUndefined(change) && !pending ) {
          if (!isUserSignedIn) {
            console.warn("[File] User not logged in")
-         } else if (!isEqual(change, value)){ // test should be redundant
+         } else if (!isEqual(change, value)){
            if (isNull(change)) {
+             setPending(true)
              userSession.deleteFile(path)
-             .then(setValue(null))
+             .then(() => setValue(null))
              .catch((err) => console.warn("Failed deleting:", path, err))
+             .finally(() => setPending(false))
            } else {
              const content = writer(change)
              const original = value
              // setValue(change) // Cannot delay until saved? as it may cause inconsistent state
+             setPending(true)
              userSession.putFile(path, content)
              .then(() => {
                // console.info("[File] Put", path, content);
-               setValue(change)})
+               setValue(change)
+               setPending(false)})
              .catch((err) => {
                  // Don't revert on error for now as it impairs UX
                  // setValue(original)
+                 setPending(false) // FIX: delay before retry?
                  console.warn("[File] Put error: ", path, err)
                })}
          } else {
            // console.log("[File] Put noop:", path)
          }
-    }},[change, userSession])
+    }},[change, userSession, pending])
   // FIX: deliver eventual error as third value?
   return [value, updateValue]
 }

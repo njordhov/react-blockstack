@@ -162,6 +162,45 @@ function useFile(path, options) {
 
   return [value, !(0, _lodash.isUndefined)(value) ? setValue : null];
 }
+/*
+function gaiaReducer (state, event) {
+  // state machine for gaia file operations
+  console.debug("Gaia:", state, event)
+  switch (state.status) {
+    case "start":
+      switch (event.action) {
+        case "reading": return({...state, status: "reading", pending: true})
+      }
+    case "reading":
+      switch (event.action) {
+        case "read-error": return({...state, status: "read-error", error: event.error})
+        case "no-file": return ({...state, status: "no-file"})
+        case "read-success": return({...state, status: "ready", content: event.content, pending: false})
+      }
+    case "no-file":
+      switch (event.action) {
+        case "writing": return({...state, status: "writing", content: event.content})
+      }
+    case "writing":
+      switch (event.action) {
+        case "write-error": return({...state, status: "write-error", error: event.error})
+        case "write-complete": return({...state, status: "ready", content: event.content})
+      }
+    case "ready":
+      switch (event.action) {
+        case "writing": return({...state, status: "writing", content: event.content})
+        case "deleting": return({...state, status: "deleting", content: event.content})
+      }
+    case "deleting":
+      switch (event.action) {
+        case "delete-error": return({...state, status: "delete-error", error: event.error})
+        case "delete-complete": return ({...state, status: "no-file", content: null})
+      }
+    default: return (state)
+  }
+}
+*/
+
 
 function useStateWithGaiaStorage(path, _ref) {
   var _ref$reader = _ref.reader,
@@ -190,6 +229,12 @@ function useStateWithGaiaStorage(path, _ref) {
       change = _useState4[0],
       setChange = _useState4[1];
 
+  var _useState5 = (0, _react.useState)(false),
+      _useState6 = _slicedToArray(_useState5, 2),
+      pending = _useState6[0],
+      setPending = _useState6[1]; // const [{status, pending}, dispatch] = useReducer(gaiaReducer, {:status: "start"})
+
+
   var updateValue = function updateValue(update) {
     // ##FIX: properly handle update being a fn, call with (change || value)
     //console.log("[File] Update:", path, update)
@@ -216,15 +261,18 @@ function useStateWithGaiaStorage(path, _ref) {
   (0, _react.useEffect)(function () {
     if ((0, _lodash.isNil)(value)) {
       if (isUserSignedIn && path) {
+        setPending(true);
         userSession.getFile(path).then(function (stored) {
           //console.info("[File] Get:", path, value, stored)
           var content = !(0, _lodash.isNil)(stored) ? reader(stored) : initial;
           setValue(content);
+          setPending(false);
         })["catch"](function (err) {
+          // retry?
           console.error("[File] Get error:", err);
         });
       } else if (path) {
-        console.info("[File] Get waiting for user to sign on:", path);
+        console.info("Waiting for user to sign on before reading file:", path);
       } else {
         console.warn("[File] No file path");
       }
@@ -232,32 +280,40 @@ function useStateWithGaiaStorage(path, _ref) {
     }
   }, [userSession, isUserSignedIn, path]);
   (0, _react.useEffect)(function () {
-    if (!(0, _lodash.isUndefined)(change)) {
+    if (!(0, _lodash.isUndefined)(change) && !pending) {
       if (!isUserSignedIn) {
         console.warn("[File] User not logged in");
       } else if (!(0, _lodash.isEqual)(change, value)) {
-        // test should be redundant
         if ((0, _lodash.isNull)(change)) {
-          userSession.deleteFile(path).then(setValue(null))["catch"](function (err) {
+          setPending(true);
+          userSession.deleteFile(path).then(function () {
+            return setValue(null);
+          })["catch"](function (err) {
             return console.warn("Failed deleting:", path, err);
+          })["finally"](function () {
+            return setPending(false);
           });
         } else {
           var content = writer(change);
           var original = value; // setValue(change) // Cannot delay until saved? as it may cause inconsistent state
 
+          setPending(true);
           userSession.putFile(path, content).then(function () {
             // console.info("[File] Put", path, content);
             setValue(change);
+            setPending(false);
           })["catch"](function (err) {
             // Don't revert on error for now as it impairs UX
             // setValue(original)
+            setPending(false); // FIX: delay before retry?
+
             console.warn("[File] Put error: ", path, err);
           });
         }
       } else {// console.log("[File] Put noop:", path)
       }
     }
-  }, [change, userSession]); // FIX: deliver eventual error as third value?
+  }, [change, userSession, pending]); // FIX: deliver eventual error as third value?
 
   return [value, updateValue];
 }
@@ -281,15 +337,15 @@ function useFilesList() {
 
   var isUserSignedIn = !!userData;
 
-  var _useState5 = (0, _react.useState)([]),
-      _useState6 = _slicedToArray(_useState5, 2),
-      value = _useState6[0],
-      setValue = _useState6[1];
-
-  var _useState7 = (0, _react.useState)(null),
+  var _useState7 = (0, _react.useState)([]),
       _useState8 = _slicedToArray(_useState7, 2),
-      fileCount = _useState8[0],
-      setCount = _useState8[1];
+      value = _useState8[0],
+      setValue = _useState8[1];
+
+  var _useState9 = (0, _react.useState)(null),
+      _useState10 = _slicedToArray(_useState9, 2),
+      fileCount = _useState10[0],
+      setCount = _useState10[1];
 
   var appendFile = (0, _react.useCallback)(function (path) {
     value.push(path);
@@ -311,10 +367,10 @@ function useFileUrl(path) {
       userSession = _useBlockstack3.userSession,
       userData = _useBlockstack3.userData;
 
-  var _useState9 = (0, _react.useState)(null),
-      _useState10 = _slicedToArray(_useState9, 2),
-      value = _useState10[0],
-      setValue = _useState10[1];
+  var _useState11 = (0, _react.useState)(null),
+      _useState12 = _slicedToArray(_useState11, 2),
+      value = _useState12[0],
+      setValue = _useState12[1];
 
   (0, _react.useEffect)(function () {
     if (userSession) {
@@ -334,10 +390,10 @@ function useFetch(path, init) {
   // For internal uses, likely better covered by other libraries
   var url = useFileUrl(path);
 
-  var _useState11 = (0, _react.useState)(null),
-      _useState12 = _slicedToArray(_useState11, 2),
-      value = _useState12[0],
-      setValue = _useState12[1];
+  var _useState13 = (0, _react.useState)(null),
+      _useState14 = _slicedToArray(_useState13, 2),
+      value = _useState14[0],
+      setValue = _useState14[1];
 
   (0, _react.useEffect)(function () {
     if (url) {
@@ -356,10 +412,10 @@ function useStateWithLocalStorage(storageKey) {
   var content = typeof stored != 'undefined' ? JSON.parse(stored) : null;
   console.log("PERSISTENT local:", stored, _typeof(stored));
 
-  var _useState13 = (0, _react.useState)(content),
-      _useState14 = _slicedToArray(_useState13, 2),
-      value = _useState14[0],
-      setValue = _useState14[1];
+  var _useState15 = (0, _react.useState)(content),
+      _useState16 = _slicedToArray(_useState15, 2),
+      value = _useState16[0],
+      setValue = _useState16[1];
 
   _react["default"].useEffect(function () {
     localStorage.setItem(storageKey, JSON.stringify(value || null));
@@ -501,10 +557,10 @@ function createAppManifestHook(appUri) {
 
 function useAppManifest(appUri) {
   // null when pending
-  var _useState15 = (0, _react.useState)(null),
-      _useState16 = _slicedToArray(_useState15, 2),
-      value = _useState16[0],
-      setValue = _useState16[1]; // ## FIX bug: May start another request while pending for a response
+  var _useState17 = (0, _react.useState)(null),
+      _useState18 = _slicedToArray(_useState17, 2),
+      value = _useState18[0],
+      setValue = _useState18[1]; // ## FIX bug: May start another request while pending for a response
 
 
   (0, _react.useEffect)(function () {
@@ -563,10 +619,10 @@ function AuthenticatedDocumentClass(props) {
 
 function useProfile(username, zoneFileLookupURL) {
   // FIX: don't lookup if username is current profile...
-  var _useState17 = (0, _react.useState)(null),
-      _useState18 = _slicedToArray(_useState17, 2),
-      value = _useState18[0],
-      setValue = _useState18[1];
+  var _useState19 = (0, _react.useState)(null),
+      _useState20 = _slicedToArray(_useState19, 2),
+      value = _useState20[0],
+      setValue = _useState20[1];
 
   var _useBlockstack5 = useBlockstack(),
       userSession = _useBlockstack5.userSession;
