@@ -147,7 +147,7 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initi
     //console.log("[File] Update:", path, update)
     if (!isUndefined(value)) {
       if (isFunction(update)) {
-        setchange(change => update(!isUndefined(change) ? change : value))
+        setChange(change => update(!isUndefined(change) ? change : value))
       } else {
         setChange(update)
       }
@@ -182,7 +182,7 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initi
       } else {
         //console.log("[File] Get skip:", value)
       }}, [userSession, isUserSignedIn, path])
-      
+
   useEffect(() => {
     if ( !isUndefined(change) && !pending ) {
          if (!isUserSignedIn) {

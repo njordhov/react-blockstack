@@ -240,7 +240,7 @@ function useStateWithGaiaStorage(path, _ref) {
     //console.log("[File] Update:", path, update)
     if (!(0, _lodash.isUndefined)(value)) {
       if ((0, _lodash.isFunction)(update)) {
-        setchange(function (change) {
+        setChange(function (change) {
           return update(!(0, _lodash.isUndefined)(change) ? change : value);
         });
       } else {
