@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.6.3] - 2019-10-19
 
-Guard against concurrent operations on the same file.
+- Guard in `useFile` against concurrent operations on the same file.
 
 ## [0.6.0] - 2019-10-12
 
