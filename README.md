@@ -16,7 +16,7 @@ Execute as early as possible to initialize the Blockstack SDK and eventually aut
 ````javascript
 import ReactBlockstack from 'react-blockstack'
 
-const { userSession } = ReactBlockstack()
+const blockstack = ReactBlockstack()
 ````
 
 Consider placing in the top level index.js file of your project. For customization of the authentication, use the same options argument as [UserSession](https://blockstack.github.io/blockstack.js/classes/usersession.html) in the Blockstack SDK:
@@ -25,10 +25,10 @@ Consider placing in the top level index.js file of your project. For customizati
 import { AppConfig } from 'blockstack'
 
 const appConfig = new AppConfig(['store_write', 'publish_data'])
-const { userSession } = ReactBlockstack({appConfig})
+const blockstack = ReactBlockstack({appConfig})
 ````
 
-Note that it is typically preferable to get `userSession` from the `useBlockstack` hook,
+The `blockstack.userSession` property is available in the rare case you need to access to the blockstack SDK on toplevel. It is typically preferable to get `userSession` from the `useBlockstack` hook,
 ignoring the return value from `ReactBlockstack`.
 
 ## React Hook for Function Components
