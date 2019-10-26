@@ -11,7 +11,7 @@ Includes backward compatibility with react class components.
 
 ## Blockstack Authentication
 
-Execute as early as possible to initialize the Blockstack SDK and eventually authenticate the user:
+Execute as early as possible to initialize the Blockstack SDK and user authentication:
 
 ````javascript
 import ReactBlockstack from 'react-blockstack'
@@ -19,7 +19,7 @@ import ReactBlockstack from 'react-blockstack'
 const blockstack = ReactBlockstack()
 ````
 
-Consider placing in the top level index.js file of your project. For customization of the authentication, use the same options argument as [UserSession](https://blockstack.github.io/blockstack.js/classes/usersession.html) in the Blockstack SDK:
+Consider placing this code in the main index.js file of your project. For customization of the authentication, use the same options argument as for [UserSession](https://blockstack.github.io/blockstack.js/classes/usersession.html) in the Blockstack SDK:
 
 ````javascript
 import { AppConfig } from 'blockstack'
@@ -28,8 +28,7 @@ const appConfig = new AppConfig(['store_write', 'publish_data'])
 const blockstack = ReactBlockstack({appConfig})
 ````
 
-The `blockstack.userSession` property is available in the rare case you need to access to the blockstack SDK on toplevel. It is typically preferable to get `userSession` from the `useBlockstack` hook,
-ignoring the return value from `ReactBlockstack`.
+The `blockstack.userSession` property is available in case you need to access to the blockstack SDK on toplevel. It is typically preferable to get `userSession` from the `useBlockstack` hook, ignoring the return value from `ReactBlockstack`.
 
 ## React Hook for Function Components
 
@@ -41,19 +40,24 @@ The hook returns these properties:
 
 * `userSession` (UserSession interface for the Blockstack SDK)
 * `userData` (UserData interface from the Blockstack SDK; `null` unless authenticated)
-* `signIn` (function to sign in the user; `null` when logged in or pending)
-* `signOut` (function to sign out the user; `null` when not logged in or pending)
+* `signIn` (function to sign in the user; `null` when already logged in or pending authentication)
+* `signOut` (function to sign out the user; `null` when not logged in or pending authentication)
 * `person` (if authenticated, a Person instance containing the user profile)
 
 Only `userSession` and `signIn` are available before authentication.
 After authentication, `signIn` is null, but there are bindings for
 `userData`, `signOut` and `person`. This can be used for conditional rendering
-depending on the authentication status.
+depending on the authentication status. Note that the user can neither sign in nor sign out when the authentication is pending, so:
 
-### Example
+```javascript
+const pendingAuthentication = !signIn && !signOut
+```
+
+### Example: Authentication Button
 
 Here is a react function component that implements an authentication button.
-It handles both signin and logout, adapting the label depending on status, changing appearance to disabled while authentication is pending:
+It handles both signin and logout, adapting the label depending on status,
+disabling the button while authentication is pending:
 
 ````javascript
 import { useBlockstack } from 'react-blockstack'
@@ -63,7 +67,7 @@ function Auth () {
     return (
         <button disabled={ !signIn && !signOut }
                 onClick={ signIn || signOut }>
-            { signIn ? "Sign In" : signOut ? "Sign Out" : "Pending" }
+            { signIn ? "Sign In" : signOut ? "Sign Out" : "..." }
         </button>
     )
 }
@@ -80,7 +84,7 @@ the functionality of `getFile`, `putFile` and `deleteFile` in the Blockstack SDK
 
 The argument is a pathname in the app's data store. The file does not have to exists before the call.
 
-The `useFile` hook returns the content of the file like `getFile`, and a function to change the file content as second value. The returned content is `undefined` until the file has been accessed and `null` if the file is determined not to exist. The setter accepts the same content types as `putFile`, and will delete the file if called with `null`. The content returned by `useFile` is conservatively updated after storing the content.
+The `useFile` hook returns the content of the file like `getFile`, with a function to change the file content as second value. The returned content is `undefined` until the file has been accessed and `null` if the file is determined not to exist. The setter accepts the same content types as `putFile`, and will delete the file if called with `null`. The content returned by `useFile` is conservatively updated, not reflecting the change until after storing the content is completed.
 
 ### Example
 
