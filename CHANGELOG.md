@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Example extracted to https://github.com/REBL-Stack/starter-app
+
 ## [0.6.3] - 2019-10-19
 
 - Guard in `useFile` against concurrent operations on the same file.

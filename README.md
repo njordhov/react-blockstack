@@ -138,8 +138,8 @@ If there are multiple Blockstack elements they will all share the same context.
 
 ## Live Demo
 
-The [example](https://github.com/njordhov/react-blockstack/tree/master/example)
-in the source repository is a reimplementation of the
+The REBL Stack [starter app](https://github.com/REBL-Stack/starter-app)
+is a reimplementation of the
 [Blockstack react template](https://github.com/blockstack/blockstack-app-generator/tree/master/react/templates).
 
 It demonstrates different ways of using react-blockStack.
