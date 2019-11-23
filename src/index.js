@@ -235,7 +235,9 @@ export function useFilesList () {
   const isUserSignedIn = !!userData
   const [value, setValue] = useState([])
   const [fileCount, setCount] = useState(null)
-  const appendFile = useCallback(path => {value.push(path); return true})
+  const appendFile = useCallback(path => {
+     setValue((value) => [...value, path]);
+     return true})
   useEffect( () => {
     if (userSession && isUserSignedIn) {
        userSession.listFiles(appendFile)
