@@ -27,7 +27,7 @@
     "react": "^16.8.0"
   },
   "dependencies": {
-    "@dbeining/react-atom": "^4.1.1",
+    "@dbeining/react-atom": "^4.1.3",
     "lodash": "^4.17.5"
   },
   "devDependencies": {
