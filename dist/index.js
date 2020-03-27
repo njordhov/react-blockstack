@@ -51,7 +51,8 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var defaultValue = {
   userData: null,
   signIn: null,
-  signOut: null
+  signOut: null,
+  authenticated: false
 };
 
 var contextAtom = _reactAtom.Atom.of(defaultValue);
@@ -96,6 +97,7 @@ function signOut(e) {
     userData: null,
     signIn: signIn,
     signOut: null,
+    authenticated: false,
     person: null
   };
   setContext(update);
@@ -108,6 +110,7 @@ function handleAuthenticated(userData) {
     userData: userData,
     person: new _blockstack.Person(userData.profile),
     signIn: null,
+    authenticated: true,
     signOut: signOut
   };
   setContext(update);
@@ -336,7 +339,8 @@ APT TO CHANGE WITHOUT FURTHER NOTICE
 
 
 function useFilesList() {
-  /* First value is a list of files, defaults to empty list
+  /* First value is a list of files, defaults to empty list.
+     Better of undefined until names retrieved?
      Second value is null then number of files when list is complete.
      FIX: Is number of files useful as output? What about errors? */
   var _useBlockstack2 = useBlockstack(),
