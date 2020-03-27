@@ -93,6 +93,36 @@ The `useFile` hook returns the content of the file like `getFile`, with a functi
 const [content, setContent] = useFile("content")
 ```
 
+## Blockstack Connect
+
+React Blockstack can be used with
+[Blockstack Connect](https://github.com/blockstack/ux/tree/master/packages/connect).
+
+To ensure that the state is properly updated after Connect authentication,
+make Connect's `authOptions.finished` callback function call `finishedConnect()`.
+
+### Example
+
+```javascript
+import { useBlockstack, didConnect } from 'react-blockstack'
+
+const App = () => {
+  const { userSession } = useBlockstack()
+  const authOptions = {
+      redirectTo: '/',
+      finished: ({ userSession }) => {
+        didConnect({ userSession })
+      },
+      userSession
+    };
+  return(
+    <Connect authOptions={authOptions}>
+      // the rest of your app's components
+    </Connect>)
+}
+
+```
+
 ## React Class Components
 
 For conventional React class components, the package provides an optional

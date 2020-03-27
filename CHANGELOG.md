@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.7] - 2020-03-27
+
+- New didConnect function to support Blockstack Connect integration
+
+## [0.6.6] - 2020-03-26
+
+- Update documentation
+
 ## [0.6.5] - 2020-03-26
 
 - New `authenticated` property returned by useBlockstack()

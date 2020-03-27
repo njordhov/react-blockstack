@@ -54,6 +54,18 @@ function handleAuthenticated (userData) {
   setContext( update )
 }
 
+export function didConnect ({userSession: session}) {
+  const { userSession, authenticated } = deref(contextAtom)
+  if (userSession != session) {
+    userSession = session;
+    setContext({ userSession })
+  }
+  if (!authenticated) {
+    const userData = userSession.loadUserData();
+    handleAuthenticated(userData)
+  }
+}
+
 export function initBlockstack (options) {
   // Idempotent
   const { userSession } = deref(contextAtom)

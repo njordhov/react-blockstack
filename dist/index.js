@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.useBlockstack = useBlockstack;
 exports.setContext = setContext;
+exports.didConnect = didConnect;
 exports.initBlockstack = initBlockstack;
 exports.Blockstack = Blockstack;
 exports.useFile = useFile;
@@ -47,6 +48,8 @@ function _nonIterableRest() { throw new TypeError("Invalid attempt to destructur
 function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
 
 var defaultValue = {
   userData: null,
@@ -116,10 +119,30 @@ function handleAuthenticated(userData) {
   setContext(update);
 }
 
+function didConnect(_ref) {
+  var session = _ref.userSession;
+
+  var _deref3 = (0, _reactAtom.deref)(contextAtom),
+      userSession = _deref3.userSession,
+      authenticated = _deref3.authenticated;
+
+  if (userSession != session) {
+    userSession = (_readOnlyError("userSession"), session);
+    setContext({
+      userSession: userSession
+    });
+  }
+
+  if (!authenticated) {
+    var userData = userSession.loadUserData();
+    handleAuthenticated(userData);
+  }
+}
+
 function initBlockstack(options) {
   // Idempotent
-  var _deref3 = (0, _reactAtom.deref)(contextAtom),
-      userSession = _deref3.userSession;
+  var _deref4 = (0, _reactAtom.deref)(contextAtom),
+      userSession = _deref4.userSession;
 
   if (!userSession) {
     var _userSession = new _blockstack.UserSession(options);
@@ -213,13 +236,13 @@ function gaiaReducer (state, event) {
 */
 
 
-function useStateWithGaiaStorage(path, _ref) {
-  var _ref$reader = _ref.reader,
-      reader = _ref$reader === void 0 ? _lodash.identity : _ref$reader,
-      _ref$writer = _ref.writer,
-      writer = _ref$writer === void 0 ? _lodash.identity : _ref$writer,
-      _ref$initial = _ref.initial,
-      initial = _ref$initial === void 0 ? null : _ref$initial;
+function useStateWithGaiaStorage(path, _ref2) {
+  var _ref2$reader = _ref2.reader,
+      reader = _ref2$reader === void 0 ? _lodash.identity : _ref2$reader,
+      _ref2$writer = _ref2.writer,
+      writer = _ref2$writer === void 0 ? _lodash.identity : _ref2$writer,
+      _ref2$initial = _ref2.initial,
+      initial = _ref2$initial === void 0 ? null : _ref2$initial;
 
   /* Low level gaia file hook
      Note: Does not guard against multiple hooks for the same file
@@ -447,14 +470,14 @@ function useStored(props) {
   var version = props.version || 0;
   var path = props.path || property;
 
-  var _ref2 = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(path, {
+  var _ref3 = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(path, {
     reader: JSON.parse,
     writer: JSON.stringify,
     initial: {}
   }),
-      _ref3 = _slicedToArray(_ref2, 2),
-      stored = _ref3[0],
-      setStored = _ref3[1];
+      _ref4 = _slicedToArray(_ref3, 2),
+      stored = _ref4[0],
+      setStored = _ref4[1];
 
   (0, _react.useEffect)(function () {
     // Load data from file
