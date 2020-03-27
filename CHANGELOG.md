@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.5] - 2020-03-26
+
+- New `authenticated` property returned by useBlockstack()
+
 ## [0.6.4] - 2019-11-22
 
 - Example extracted to https://github.com/REBL-Stack/starter-app

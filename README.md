@@ -110,14 +110,15 @@ The Blockstack SDK properties are implicitly passed through the component tree a
 
 ### Example
 
-The App component below will automatically be updated whenever there is a change in the Blockstack status.
-Note the use of the `this.context` containing the properties and
+The App component below will automatically be updated whenever there is a change in the Blockstack status. Note the use of the `this.context` containing the properties and
 that the class is required to have `contextType = BlockstackContext`.
 
 ````javascript
+import React, { Component } from 'react'
 import BlockstackContext from 'react-blockstack/dist/context'
 
 export default class App extends Component {
+  static contextType = BlockstackContext
   render() {
     const { person } = this.context
     const avatarUrl = person && person.avatarUrl && person.avatarUrl()
@@ -131,10 +132,9 @@ export default class App extends Component {
     )
   }
 }
-App.contextType = BlockstackContext
 ````
 
-If there are multiple Blockstack elements they will all share the same context.
+If there are multiple Blockstack components they will all share the same context.
 
 ## Live Demo
 

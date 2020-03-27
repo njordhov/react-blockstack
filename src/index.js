@@ -3,7 +3,7 @@ import { UserSession, AppConfig, Person, lookupProfile } from 'blockstack'
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
 import { isNil, isNull, isEqual, isFunction, isUndefined, merge, set, identity } from 'lodash'
 
-const defaultValue = {userData: null, signIn: null, signOut: null}
+const defaultValue = {userData: null, signIn: null, signOut: null, authenticated: false}
 
 const contextAtom = Atom.of(defaultValue)
 
@@ -38,6 +38,7 @@ function signOut(e) {
   const update = { userData: null,
                    signIn: signIn,
                    signOut: null,
+                   authenticated: false,
                    person: null }
   setContext( update )
   userSession.signUserOut()
@@ -48,6 +49,7 @@ function handleAuthenticated (userData) {
   const update = { userData: userData,
                    person: new Person(userData.profile),
                    signIn: null,
+                   authenticated: true,
                    signOut: signOut }
   setContext( update )
 }
@@ -228,7 +230,8 @@ APT TO CHANGE WITHOUT FURTHER NOTICE
 /* Low-level hooks for Gaia file system */
 
 export function useFilesList () {
-  /* First value is a list of files, defaults to empty list
+  /* First value is a list of files, defaults to empty list.
+     Better of undefined until names retrieved?
      Second value is null then number of files when list is complete.
      FIX: Is number of files useful as output? What about errors? */
   const { userSession, userData } = useBlockstack()
