@@ -40,13 +40,14 @@ The hook returns these properties:
 
 * `userSession` (UserSession interface for the Blockstack SDK)
 * `userData` (UserData interface from the Blockstack SDK; `null` unless authenticated)
+* `authenticated` (true when authentication is complete)
 * `signIn` (function to sign in the user; `null` when already logged in or pending authentication)
 * `signOut` (function to sign out the user; `null` when not logged in or pending authentication)
 * `person` (if authenticated, a Person instance containing the user profile)
 
 Only `userSession` and `signIn` are available before authentication.
 After authentication, `signIn` is null, but there are bindings for
-`userData`, `signOut` and `person`. This can be used for conditional rendering
+`userData`, `authenticated`, `signOut` and `person`. This can be used for conditional rendering
 depending on the authentication status. Note that the user can neither sign in nor sign out when the authentication is pending, so:
 
 ```javascript
