@@ -54,18 +54,6 @@ function handleAuthenticated (userData) {
   setContext( update )
 }
 
-export function didConnect ({userSession: session}) {
-  const { userSession, authenticated } = deref(contextAtom)
-  if (userSession != session) {
-    userSession = session;
-    setContext({ userSession })
-  }
-  if (!authenticated) {
-    const userData = userSession.loadUserData();
-    handleAuthenticated(userData)
-  }
-}
-
 export function initBlockstack (options) {
   // Idempotent
   const { userSession } = deref(contextAtom)
@@ -95,6 +83,35 @@ export function Blockstack(props) {
    return <BlockstackContext.Provider value={context}>
             {props.children}
           </BlockstackContext.Provider>
+}
+
+export function didConnect ({userSession: session}) {
+  const { userSession, authenticated } = deref(contextAtom)
+  if (userSession != session) {
+    userSession = session;
+    setContext({ userSession })
+  }
+  if (!authenticated) {
+    const userData = userSession.loadUserData();
+    handleAuthenticated(userData)
+  }
+}
+
+export function useConnectOptions (options) {
+  const {userSession} = useBlockstack()
+  const authOptions = {
+    redirectTo: '/',
+    manifest: '/manifest.json',
+    finished: ({userSession}) => {
+      didConnect({userSession})
+    },
+    userSession: userSession,
+    appDetails: {
+      name: "Blockstack App",
+      icon: '/logo.svg'
+    }
+  }
+  return merge({}, authOptions, options)
 }
 
 export function useFile (path, options) {

@@ -99,7 +99,7 @@ React Blockstack can be used with
 [Blockstack Connect](https://github.com/blockstack/ux/tree/master/packages/connect).
 
 To ensure that the state is properly updated after Connect authentication,
-make Connect's `authOptions.finished` callback function call `finishedConnect()`.
+make Connect's `authOptions.finished` callback function call `didConnect()`.
 
 ### Example
 

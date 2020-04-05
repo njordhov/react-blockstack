@@ -31,12 +31,12 @@
     "lodash": "^4.17.5"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/runtime": "^7.5.5",
-    "babel-loader": "^8.0.6"
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-react": "^7.9.4",
+    "@babel/runtime": "^7.9.2",
+    "babel-loader": "^8.1.0"
   },
   "scripts": {
     "build": "babel src --out-dir dist"

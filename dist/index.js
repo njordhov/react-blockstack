@@ -5,9 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.useBlockstack = useBlockstack;
 exports.setContext = setContext;
-exports.didConnect = didConnect;
 exports.initBlockstack = initBlockstack;
 exports.Blockstack = Blockstack;
+exports.didConnect = didConnect;
+exports.useConnectOptions = useConnectOptions;
 exports.useFile = useFile;
 exports.useFilesList = useFilesList;
 exports.useFileUrl = useFileUrl;
@@ -119,30 +120,10 @@ function handleAuthenticated(userData) {
   setContext(update);
 }
 
-function didConnect(_ref) {
-  var session = _ref.userSession;
-
-  var _deref3 = (0, _reactAtom.deref)(contextAtom),
-      userSession = _deref3.userSession,
-      authenticated = _deref3.authenticated;
-
-  if (userSession != session) {
-    userSession = (_readOnlyError("userSession"), session);
-    setContext({
-      userSession: userSession
-    });
-  }
-
-  if (!authenticated) {
-    var userData = userSession.loadUserData();
-    handleAuthenticated(userData);
-  }
-}
-
 function initBlockstack(options) {
   // Idempotent
-  var _deref4 = (0, _reactAtom.deref)(contextAtom),
-      userSession = _deref4.userSession;
+  var _deref3 = (0, _reactAtom.deref)(contextAtom),
+      userSession = _deref3.userSession;
 
   if (!userSession) {
     var _userSession = new _blockstack.UserSession(options);
@@ -182,6 +163,48 @@ function Blockstack(props) {
   return _react["default"].createElement(BlockstackContext.Provider, {
     value: context
   }, props.children);
+}
+
+function didConnect(_ref) {
+  var session = _ref.userSession;
+
+  var _deref4 = (0, _reactAtom.deref)(contextAtom),
+      userSession = _deref4.userSession,
+      authenticated = _deref4.authenticated;
+
+  if (userSession != session) {
+    userSession = (_readOnlyError("userSession"), session);
+    setContext({
+      userSession: userSession
+    });
+  }
+
+  if (!authenticated) {
+    var userData = userSession.loadUserData();
+    handleAuthenticated(userData);
+  }
+}
+
+function useConnectOptions(options) {
+  var _useBlockstack = useBlockstack(),
+      userSession = _useBlockstack.userSession;
+
+  var authOptions = {
+    redirectTo: '/',
+    manifest: '/manifest.json',
+    finished: function finished(_ref2) {
+      var userSession = _ref2.userSession;
+      didConnect({
+        userSession: userSession
+      });
+    },
+    userSession: userSession,
+    appDetails: {
+      name: "Blockstack App",
+      icon: '/logo.svg'
+    }
+  };
+  return (0, _lodash.merge)({}, authOptions, options);
 }
 
 function useFile(path, options) {
@@ -236,13 +259,13 @@ function gaiaReducer (state, event) {
 */
 
 
-function useStateWithGaiaStorage(path, _ref2) {
-  var _ref2$reader = _ref2.reader,
-      reader = _ref2$reader === void 0 ? _lodash.identity : _ref2$reader,
-      _ref2$writer = _ref2.writer,
-      writer = _ref2$writer === void 0 ? _lodash.identity : _ref2$writer,
-      _ref2$initial = _ref2.initial,
-      initial = _ref2$initial === void 0 ? null : _ref2$initial;
+function useStateWithGaiaStorage(path, _ref3) {
+  var _ref3$reader = _ref3.reader,
+      reader = _ref3$reader === void 0 ? _lodash.identity : _ref3$reader,
+      _ref3$writer = _ref3.writer,
+      writer = _ref3$writer === void 0 ? _lodash.identity : _ref3$writer,
+      _ref3$initial = _ref3.initial,
+      initial = _ref3$initial === void 0 ? null : _ref3$initial;
 
   /* Low level gaia file hook
      Note: Does not guard against multiple hooks for the same file
@@ -286,9 +309,9 @@ function useStateWithGaiaStorage(path, _ref2) {
   }; //console.log("[File]:", path, " = ", value)
 
 
-  var _useBlockstack = useBlockstack(),
-      userSession = _useBlockstack.userSession,
-      userData = _useBlockstack.userData;
+  var _useBlockstack2 = useBlockstack(),
+      userSession = _useBlockstack2.userSession,
+      userData = _useBlockstack2.userData;
 
   var isUserSignedIn = !!userData; // React roadmap is to support data loading with Suspense hook
 
@@ -366,9 +389,9 @@ function useFilesList() {
      Better of undefined until names retrieved?
      Second value is null then number of files when list is complete.
      FIX: Is number of files useful as output? What about errors? */
-  var _useBlockstack2 = useBlockstack(),
-      userSession = _useBlockstack2.userSession,
-      userData = _useBlockstack2.userData;
+  var _useBlockstack3 = useBlockstack(),
+      userSession = _useBlockstack3.userSession,
+      userData = _useBlockstack3.userData;
 
   var isUserSignedIn = !!userData;
 
@@ -400,9 +423,9 @@ function useFilesList() {
 
 function useFileUrl(path) {
   // FIX: Should combine with others?
-  var _useBlockstack3 = useBlockstack(),
-      userSession = _useBlockstack3.userSession,
-      userData = _useBlockstack3.userData;
+  var _useBlockstack4 = useBlockstack(),
+      userSession = _useBlockstack4.userSession,
+      userData = _useBlockstack4.userData;
 
   var _useState11 = (0, _react.useState)(null),
       _useState12 = _slicedToArray(_useState11, 2),
@@ -470,14 +493,14 @@ function useStored(props) {
   var version = props.version || 0;
   var path = props.path || property;
 
-  var _ref3 = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(path, {
+  var _ref4 = props.local ? useStateWithLocalStorage(path) : useStateWithGaiaStorage(path, {
     reader: JSON.parse,
     writer: JSON.stringify,
     initial: {}
   }),
-      _ref4 = _slicedToArray(_ref3, 2),
-      stored = _ref4[0],
-      setStored = _ref4[1];
+      _ref5 = _slicedToArray(_ref4, 2),
+      stored = _ref5[0],
+      setStored = _ref5[1];
 
   (0, _react.useEffect)(function () {
     // Load data from file
@@ -636,8 +659,8 @@ function AuthenticatedDocumentClass(props) {
   // declare a classname decorating the document element when authenticated
   var className = props.name;
 
-  var _useBlockstack4 = useBlockstack(),
-      userData = _useBlockstack4.userData;
+  var _useBlockstack5 = useBlockstack(),
+      userData = _useBlockstack5.userData;
 
   (0, _react.useEffect)(function () {
     console.log("Updating documentElement classes to reflect signed in status:", !!userData);
@@ -661,8 +684,8 @@ function useProfile(username, zoneFileLookupURL) {
       value = _useState20[0],
       setValue = _useState20[1];
 
-  var _useBlockstack5 = useBlockstack(),
-      userSession = _useBlockstack5.userSession;
+  var _useBlockstack6 = useBlockstack(),
+      userSession = _useBlockstack6.userSession;
 
   (0, _react.useEffect)(function () {
     if (userSession && username) {
