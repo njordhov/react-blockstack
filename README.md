@@ -101,20 +101,24 @@ React Blockstack can be used with
 To ensure that the state is properly updated after Connect authentication,
 make Connect's `authOptions.finished` callback function call `didConnect()`.
 
+The `useConnectOptions()` hook can be used to fill in default options like the 
+`userSession`. The argument is the same as the authOptions in Connect. 
+The hook provides sensible defaults if called without an argument.
+
 ### Example
 
 ```javascript
-import { useBlockstack, didConnect } from 'react-blockstack'
+import { useBlockstack, didConnect, useConnectOptions } from 'react-blockstack'
+
+const connectOptions = {
+    redirectTo: '/',
+    finished: ({ userSession }) => {
+      didConnect({ userSession })
+    }
+  };
 
 const App = () => {
-  const { userSession } = useBlockstack()
-  const authOptions = {
-      redirectTo: '/',
-      finished: ({ userSession }) => {
-        didConnect({ userSession })
-      },
-      userSession
-    };
+  const authOptions = useConnectOptions(connectOptions);
   return(
     <Connect authOptions={authOptions}>
       // the rest of your app's components

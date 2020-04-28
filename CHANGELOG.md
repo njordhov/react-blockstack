@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.9] - 2020-04-28
+
+- The useFile hook doesn't fail with SDK 21 when the file is missing
+- Documenting the `useConnectOptions` hook for Connect integration
+
 ## [0.6.8] - 2020-03-27
 
 - Unofficial `useConnectOptions` hook for Connect integration

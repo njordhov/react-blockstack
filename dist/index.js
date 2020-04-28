@@ -312,27 +312,31 @@ function useStateWithGaiaStorage(path, _ref3) {
     } else {
       throw "Premature attempt to update file:" + path;
     }
-  }; //console.log("[File]:", path, " = ", value)
-
+  };
 
   var _useBlockstack2 = useBlockstack(),
       userSession = _useBlockstack2.userSession,
-      userData = _useBlockstack2.userData;
+      userData = _useBlockstack2.userData,
+      authenticated = _useBlockstack2.authenticated; // React roadmap is to support data loading with Suspense hook
 
-  var isUserSignedIn = !!userData; // React roadmap is to support data loading with Suspense hook
 
   (0, _react.useEffect)(function () {
     if ((0, _lodash.isNil)(value)) {
-      if (isUserSignedIn && path) {
+      if (authenticated && path) {
         setPending(true);
         userSession.getFile(path).then(function (stored) {
           //console.info("[File] Get:", path, value, stored)
           var content = !(0, _lodash.isNil)(stored) ? reader(stored) : initial;
           setValue(content);
-          setPending(false);
         })["catch"](function (err) {
-          // retry?
-          console.error("[File] Get error:", err);
+          if (error.code === "does_not_exist") {
+            // SDK 21 errs when file does not exist
+            setValue(initial);
+          } else {
+            console.error("[File] Get error:", err);
+          }
+        })["finally"](function () {
+          return setPending(false);
         });
       } else if (path) {
         console.info("Waiting for user to sign on before reading file:", path);
@@ -341,10 +345,10 @@ function useStateWithGaiaStorage(path, _ref3) {
       }
     } else {//console.log("[File] Get skip:", value)
     }
-  }, [userSession, isUserSignedIn, path]);
+  }, [userSession, authenticated, path]);
   (0, _react.useEffect)(function () {
     if (!(0, _lodash.isUndefined)(change) && !pending) {
-      if (!isUserSignedIn) {
+      if (!authenticated) {
         console.warn("[File] User not logged in");
       } else if (!(0, _lodash.isEqual)(change, value)) {
         if ((0, _lodash.isNull)(change)) {
@@ -397,9 +401,8 @@ function useFilesList() {
      FIX: Is number of files useful as output? What about errors? */
   var _useBlockstack3 = useBlockstack(),
       userSession = _useBlockstack3.userSession,
-      userData = _useBlockstack3.userData;
-
-  var isUserSignedIn = !!userData;
+      userData = _useBlockstack3.userData,
+      authenticated = _useBlockstack3.authenticated;
 
   var _useState7 = (0, _react.useState)([]),
       _useState8 = _slicedToArray(_useState7, 2),
@@ -418,12 +421,12 @@ function useFilesList() {
     return true;
   });
   (0, _react.useEffect)(function () {
-    if (userSession && isUserSignedIn) {
+    if (userSession && authenticated) {
       userSession.listFiles(appendFile).then(setCount)["catch"](function (err) {
         return console.warn("Failed retrieving files list:", err);
       });
     }
-  }, [userSession, isUserSignedIn]);
+  }, [userSession, authenticated]);
   return [value, fileCount];
 }
 

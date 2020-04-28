@@ -186,25 +186,27 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initi
       throw "Premature attempt to update file:" + path
     }
   }
-  //console.log("[File]:", path, " = ", value)
-  const { userSession, userData } = useBlockstack()
-  const isUserSignedIn = !!userData
+  const { userSession, userData, authenticated } = useBlockstack()
   // React roadmap is to support data loading with Suspense hook
   useEffect (() => {
     if ( isNil(value) ) {
-      if (isUserSignedIn && path) {
+      if (authenticated && path) {
           setPending(true)
           userSession.getFile(path)
           .then(stored => {
                //console.info("[File] Get:", path, value, stored)
                const content = !isNil(stored) ? reader(stored) : initial
                setValue(content)
-               setPending(false)
               })
-           .catch(err => {
-             // retry?
-             console.error("[File] Get error:", err)
+          .catch(err => {
+             if (error.code === "does_not_exist") { 
+               // SDK 21 errs when file does not exist
+               setValue(initial)
+             } else {
+               console.error("[File] Get error:", err) 
+             }
            })
+           .finally(() => setPending(false))
         } else if (path) {
           console.info("Waiting for user to sign on before reading file:", path)
         } else {
@@ -212,11 +214,11 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initi
         }
       } else {
         //console.log("[File] Get skip:", value)
-      }}, [userSession, isUserSignedIn, path])
+      }}, [userSession, authenticated, path])
 
   useEffect(() => {
     if ( !isUndefined(change) && !pending ) {
-         if (!isUserSignedIn) {
+         if (!authenticated) {
            console.warn("[File] User not logged in")
          } else if (!isEqual(change, value)){
            if (isNull(change)) {
@@ -263,19 +265,18 @@ export function useFilesList () {
      Better of undefined until names retrieved?
      Second value is null then number of files when list is complete.
      FIX: Is number of files useful as output? What about errors? */
-  const { userSession, userData } = useBlockstack()
-  const isUserSignedIn = !!userData
+  const { userSession, userData, authenticated } = useBlockstack()
   const [value, setValue] = useState([])
   const [fileCount, setCount] = useState(null)
   const appendFile = useCallback(path => {
      setValue((value) => [...value, path]);
      return true})
   useEffect( () => {
-    if (userSession && isUserSignedIn) {
+    if (userSession && authenticated) {
        userSession.listFiles(appendFile)
        .then(setCount)
        .catch((err) => console.warn("Failed retrieving files list:", err))
-  }}, [userSession, isUserSignedIn])
+  }}, [userSession, authenticated])
   return ([value, fileCount])
 }
 
