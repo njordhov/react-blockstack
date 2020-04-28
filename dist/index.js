@@ -328,12 +328,12 @@ function useStateWithGaiaStorage(path, _ref3) {
           //console.info("[File] Get:", path, value, stored)
           var content = !(0, _lodash.isNil)(stored) ? reader(stored) : initial;
           setValue(content);
-        })["catch"](function (err) {
+        })["catch"](function (error) {
           if (error.code === "does_not_exist") {
             // SDK 21 errs when file does not exist
             setValue(initial);
           } else {
-            console.error("[File] Get error:", err);
+            console.error("[File] Get error:", error);
           }
         })["finally"](function () {
           return setPending(false);

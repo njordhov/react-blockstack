@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.10] - 2020-04-28
+
+- Minor correction
+
 ## [0.6.9] - 2020-04-28
 
 - The useFile hook doesn't fail with SDK 21 when the file is missing

@@ -198,12 +198,12 @@ function useStateWithGaiaStorage (path, {reader=identity, writer=identity, initi
                const content = !isNil(stored) ? reader(stored) : initial
                setValue(content)
               })
-          .catch(err => {
+          .catch(error => {
              if (error.code === "does_not_exist") { 
                // SDK 21 errs when file does not exist
                setValue(initial)
              } else {
-               console.error("[File] Get error:", err) 
+               console.error("[File] Get error:", error) 
              }
            })
            .finally(() => setPending(false))
