@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Document use with showBlockstackConnect
+
 ## [0.6.10] - 2020-04-28
 
 - Minor correction

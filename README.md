@@ -108,21 +108,23 @@ The hook provides sensible defaults if called without an argument.
 ### Example
 
 ```javascript
-import { useBlockstack, didConnect, useConnectOptions } from 'react-blockstack'
+import { didConnect, useConnectOptions } from 'react-blockstack'
 
 const connectOptions = {
     redirectTo: '/',
     finished: ({ userSession }) => {
       didConnect({ userSession })
     }
-  };
+  }
 
-const App = () => {
-  const authOptions = useConnectOptions(connectOptions);
+function Register (props) {
+  const authOptions = useConnectOptions(connectOptions)
+  const signIn = useCallback(authOptions && (() => {
+    showBlockstackConnect(authOptions)
+  }), [authOptions])
   return(
-    <Connect authOptions={authOptions}>
-      // the rest of your app's components
-    </Connect>)
+    <button disabled={!signIn} onClick={signIn}>Sign In</button>
+  )
 }
 
 ```
