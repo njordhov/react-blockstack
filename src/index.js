@@ -1,5 +1,5 @@
 import React, { Component, createContext, useState, useEffect, useContext, useCallback, useReducer } from 'react'
-import { UserSession, AppConfig, Person, lookupProfile } from 'blockstack'
+import { UserSession, AppConfig, lookupProfile, Person } from '@stacks/auth'
 import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
 import { isNil, isNull, isEqual, isFunction, isUndefined, merge, set, identity } from 'lodash'
 
