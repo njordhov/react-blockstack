@@ -1,7 +1,25 @@
-import React, { Component, createContext, useState, useEffect, useContext, useCallback, useReducer } from 'react'
-import { UserSession, AppConfig, lookupProfile, Person } from '@stacks/auth'
-import { Atom, swap, useAtom, deref} from "@dbeining/react-atom"
-import { isNil, isNull, isEqual, isFunction, isUndefined, merge, set, identity } from 'lodash'
+import React, {
+  Component,
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useReducer,
+} from "react";
+import { UserSession, AppConfig, lookupProfile } from "@stacks/auth";
+import { Person } from "@stacks/profile";
+import { Atom, swap, useAtom, deref } from "@dbeining/react-atom";
+import {
+  isNil,
+  isNull,
+  isEqual,
+  isFunction,
+  isUndefined,
+  merge,
+  set,
+  identity,
+} from "lodash";
 
 const defaultValue = {userData: null, signIn: null, signOut: null, authenticated: false}
 
