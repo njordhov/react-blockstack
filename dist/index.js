@@ -26,6 +26,8 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _auth = require("@stacks/auth");
 
+var _profile = require("@stacks/profile");
+
 var _reactAtom = require("@dbeining/react-atom");
 
 var _lodash = require("lodash");
@@ -118,7 +120,7 @@ function handleAuthenticated(userData) {
   window.history.replaceState({}, document.title, window.location.pathname);
   var update = {
     userData: userData,
-    person: new _auth.Person(userData.profile),
+    person: new _profile.Person(userData.profile),
     signIn: null,
     authenticated: true,
     signOut: signOut
