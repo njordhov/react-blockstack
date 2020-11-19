@@ -24,7 +24,9 @@ exports.BlockstackContext = exports["default"] = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
-var _blockstack = require("blockstack");
+var _auth = require("@stacks/auth");
+
+var _profile = require("@stacks/profile");
 
 var _reactAtom = require("@dbeining/react-atom");
 
@@ -48,7 +50,7 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
@@ -118,7 +120,7 @@ function handleAuthenticated(userData) {
   window.history.replaceState({}, document.title, window.location.pathname);
   var update = {
     userData: userData,
-    person: new _blockstack.Person(userData.profile),
+    person: new _profile.Person(userData.profile),
     signIn: null,
     authenticated: true,
     signOut: signOut
@@ -132,7 +134,7 @@ function initBlockstack(options) {
       userSession = _deref3.userSession;
 
   if (!userSession) {
-    var _userSession = new _blockstack.UserSession(options);
+    var _userSession = new _auth.UserSession(options);
 
     var update = {
       userSession: _userSession
@@ -161,7 +163,7 @@ function initBlockstack(options) {
 
 var _default = initBlockstack;
 exports["default"] = _default;
-var BlockstackContext = (0, _react.createContext)(defaultValue);
+var BlockstackContext = /*#__PURE__*/(0, _react.createContext)(defaultValue);
 exports.BlockstackContext = BlockstackContext;
 
 function Blockstack(props) {
@@ -698,7 +700,7 @@ function useProfile(username, zoneFileLookupURL) {
 
   (0, _react.useEffect)(function () {
     if (userSession && username) {
-      (0, _blockstack.lookupProfile)(username, zoneFileLookupURL).then(setValue)["catch"](function (err) {
+      (0, _auth.lookupProfile)(username, zoneFileLookupURL).then(setValue)["catch"](function (err) {
         return console.warn("Failed to use profile:", err);
       });
     }
